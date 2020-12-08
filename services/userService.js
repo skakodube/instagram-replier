@@ -35,4 +35,13 @@ module.exports = class UserService {
 
     return userRecord;
   }
+
+  async getMe(user) {
+    let userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+
+    return userRecord;
+  }
 };

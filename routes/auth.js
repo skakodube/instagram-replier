@@ -34,7 +34,7 @@ router.post(
     const token = generateJwtToken(newUserRecord);
     res
       .header("x-auth-token", token)
-      .send(_.pick(newUserRecord, ["_id", "name", "email"]));
+      .send(_.pick(newUserRecord, ["name", "email"]));
   }
 );
 
@@ -55,7 +55,7 @@ router.post(
     const token = generateJwtToken(loginedUserRecord);
     res
       .header("x-auth-token", generateJwtToken(token))
-      .send(_.pick(loginedUserRecord, ["_id", "name", "email"]));
+      .send(_.pick(loginedUserRecord, ["name", "email"]));
   }
 );
 
