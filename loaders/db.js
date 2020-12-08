@@ -6,7 +6,7 @@ module.exports = async function () {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
-      // useFindAndModify: true,
+      useFindAndModify: false,
       useCreateIndex: true,
     });
     logger.info(`MongoDB Connected: ${conn.connection.host}`);

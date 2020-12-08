@@ -23,6 +23,10 @@ const UserModel = mongoose.model(
       maxlength: 1024,
     },
     isAdmin: Boolean,
+    dateRegistered: {
+      type: Date,
+      default: Date.now,
+    },
   })
 );
 

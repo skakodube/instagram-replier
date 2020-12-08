@@ -44,10 +44,77 @@ module.exports = class UserService {
     if (!userRecord) throw new ServiceError("user doesn't exist");
 
     let botRecord = await BotModel.findOneAndDelete({
+      userCreated: userRecord._id,
       instagramUrl: instagramUrl,
     });
     if (!botRecord) throw new ServiceError("invalid bot");
 
     return botRecord;
+  }
+
+  async addReply(user, instagramUrl, keywords, replyText) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+
+    let botRecord = await BotModel.findOne({
+      userCreated: userRecord._id,
+      instagramUrl: instagramUrl,
+    });
+    if (!botRecord) throw new ServiceError("invalid bot");
+
+    let newReply = new ReplyModel({
+      botBelongs: botRecord._id,
+      keywords: keywords,
+      text: replyText,
+    });
+
+    await newReply.save();
+
+    return botRecord;
+  }
+
+  async deleteReply(user, instagramUrl, replyId) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+
+    let botRecord = await BotModel.findOne({
+      userCreated: userRecord._id,
+      instagramUrl: instagramUrl,
+    });
+    if (!botRecord) throw new ServiceError("invalid bot");
+
+    let replyRecord = await ReplyModel.findByIdAndDelete(replyId);
+    if (!replyRecord) throw new ServiceError("invalid reply");
+
+    return replyRecord;
+  }
+
+  async modifyReply(user, instagramUrl, replyId, keywords, replyText) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+
+    let botRecord = await BotModel.findOne({
+      userCreated: userRecord._id,
+      instagramUrl: instagramUrl,
+    });
+    if (!botRecord) throw new ServiceError("invalid bot");
+
+    let replyRecord = await ReplyModel.findByIdAndUpdate(
+      replyId,
+      {
+        keywords: keywords,
+        text: replyText,
+      },
+      { new: true }
+    );
+    if (!replyRecord) throw new ServiceError("invalid reply");
+
+    return replyRecord;
   }
 };

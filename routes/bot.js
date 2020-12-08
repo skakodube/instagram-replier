@@ -44,6 +44,84 @@ router.delete(
   }
 );
 
+router.post(
+  "/addreply",
+  [
+    celebrate({
+      body: {
+        instagramUrl: Joi.string().required(),
+        keywords: Joi.array().items(Joi.string()).required().min(1),
+        replyText: Joi.string().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const bot = await botService.addReply(
+      req.user,
+      req.body.instagramUrl,
+      req.body.keywords,
+      req.body.replyText
+    );
+
+    res.send(bot);
+  }
+);
+
+router.delete(
+  "/deletereply",
+  [
+    celebrate({
+      body: {
+        instagramUrl: Joi.string().required(),
+        replyId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const bot = await botService.deleteReply(
+      req.user,
+      req.body.instagramUrl,
+      req.body.replyId
+    );
+
+    res.send(bot);
+  }
+);
+
+router.put(
+  "/modifyreply",
+  [
+    celebrate({
+      body: {
+        instagramUrl: Joi.string().required(),
+        replyId: Joi.objectId().required(),
+        keywords: Joi.array().items(Joi.string()).required().min(1),
+        replyText: Joi.string().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const reply = await botService.modifyReply(
+      req.user,
+      req.body.instagramUrl,
+      req.body.replyId,
+      req.body.keywords,
+      req.body.replyText
+    );
+
+    res.send(reply);
+  }
+);
+
 // router.get("/", [auth], async (req, res) => {
 //   const userService = new UserService();
 
