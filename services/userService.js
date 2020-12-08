@@ -42,6 +42,6 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
 
-    return userRecord;
+    return _.pick(userRecord, ["name", "email"]);
   }
 };

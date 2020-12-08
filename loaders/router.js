@@ -4,6 +4,7 @@ const cors = require("cors");
 const { errors: joiError } = require("celebrate");
 const auth = require("../routes/auth");
 const user = require("../routes/user");
+const bot = require("../routes/bot");
 
 module.exports = function (app) {
   app.get("/status", (req, res) => {
@@ -21,6 +22,7 @@ module.exports = function (app) {
   });
   app.use("/auth", auth);
   app.use("/user", user);
+  app.use("/bot", bot);
   app.use(joiError());
   app.use(error);
 };

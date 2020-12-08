@@ -54,14 +54,14 @@ router.post(
 
     const token = generateJwtToken(loginedUserRecord);
     res
-      .header("x-auth-token", generateJwtToken(token))
+      .header("x-auth-token", token)
       .send(_.pick(loginedUserRecord, ["name", "email"]));
   }
 );
 
 function generateJwtToken(user) {
   const token = jwt.sign(
-    { _id: user._id, isAdmin: user.isAdmin },
+    { email: user.email, isAdmin: user.isAdmin },
     process.env.JWT_PRIVATE_KEY
   );
   return token;
