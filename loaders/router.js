@@ -14,7 +14,7 @@ module.exports = function (app) {
     res.status(200).end();
   });
 
-  // app.use(cors);
+  app.use(cors);
   app.use(express.json());
   app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "*");
