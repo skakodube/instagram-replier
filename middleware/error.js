@@ -20,6 +20,9 @@ module.exports = function (err, req, res, next) {
       case "invalid token":
         statusCode = 400;
         break;
+      case "couldn't send an email":
+        statusCode = 400;
+        break;
       default:
         statusCode = 405;
     }
@@ -28,6 +31,7 @@ module.exports = function (err, req, res, next) {
       error: err.message,
     });
   } else {
+    console.log("ELSE");
     logger.error(err.stack || "Undefined Error");
     res.status(500).send({
       statusCode: 500,

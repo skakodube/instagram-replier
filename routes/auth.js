@@ -4,6 +4,7 @@ const { celebrate, Joi } = require("celebrate");
 Joi.objectId = require("joi-objectid")(Joi);
 const passwordComplexity = require("joi-password-complexity").default;
 const UserService = require("../services/userService");
+const EmailService = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 
@@ -35,6 +36,10 @@ router.post(
     res
       .header("x-auth-token", token)
       .send(_.pick(newUserRecord, ["name", "email"]));
+
+    const emailService = new EmailService();
+
+    emailService.sendVerificationEmail(req.body);
   }
 );
 

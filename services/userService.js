@@ -44,4 +44,18 @@ module.exports = class UserService {
 
     return _.pick(userRecord, ["name", "email"]);
   }
+
+  async verify(user) {
+    //after email verified
+    let userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+
+    userRecord.verified = true;
+
+    await userRecord.save();
+
+    return userRecord.verified;
+  }
 };
