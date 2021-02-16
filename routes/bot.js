@@ -6,6 +6,12 @@ const BotService = require("../services/botService");
 const _ = require("lodash");
 const auth = require("../middleware/auth");
 
+router.get("/", [auth], async (req, res) => {
+  const botService = new BotService();
+  let bots = await botService.getBots(req.user);
+  res.send(bots);
+});
+
 router.post(
   "/new",
   [
@@ -59,14 +65,14 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const bot = await botService.addReply(
+    const reply = await botService.addReply(
       req.user,
       req.body.instagramUrl,
       req.body.keywords,
       req.body.replyText
     );
 
-    res.send(bot);
+    res.send(reply);
   }
 );
 
@@ -84,13 +90,13 @@ router.delete(
   async (req, res) => {
     const botService = new BotService();
 
-    const bot = await botService.deleteReply(
+    const reply = await botService.deleteReply(
       req.user,
       req.body.instagramUrl,
       req.body.replyId
     );
 
-    res.send(bot);
+    res.send(reply);
   }
 );
 

@@ -26,4 +26,21 @@ module.exports = class EmailService {
       throw new ServiceError("couldn't send an email");
     });
   }
+
+  async sendResetPasswordEmail(user) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) return;
+
+    let msg = {
+      to: userRecord.email,
+      from: emailFrom,
+      template_id: welcomeTemplate,
+    };
+
+    await sgMail.send(msg).catch(() => {
+      throw new ServiceError("couldn't send an email");
+    });
+  }
 };

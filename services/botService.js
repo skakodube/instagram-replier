@@ -4,7 +4,32 @@ const ReplyModel = require("../models/reply");
 const ServiceError = require("../errors/serviceError");
 const _ = require("lodash");
 
+//SHOULD ONLY VERIFIED USERS?
+
 module.exports = class UserService {
+  async getBots(user) {
+    const userBotsReplies = await UserModel.findOne({
+      email: user.email,
+    })
+      .populate([
+        {
+          path: "bots",
+          model: "Bot",
+          select: "dateCreated instagramUrl",
+          populate: {
+            path: "replies",
+            model: "Reply",
+            select: "keywords text",
+          },
+        },
+      ])
+      .select("email name verified isAdmin dateRegistered");
+
+    if (!userBotsReplies) throw new ServiceError("user doesn't exist");
+
+    return userBotsReplies;
+  }
+
   async createBot(user, instagramUrl) {
     const userRecord = await UserModel.findOne({
       email: user.email,
@@ -21,18 +46,10 @@ module.exports = class UserService {
       instagramUrl: instagramUrl,
     });
 
+    userRecord.bots.push(newBotRecord._id);
+
+    await userRecord.save();
     await newBotRecord.save();
-
-    let newDefaultReply = new ReplyModel({
-      botBelongs: newBotRecord._id,
-      keywords: ["Hello"],
-      text: "Welcome to my instagram profile!",
-    });
-
-    await newDefaultReply.save();
-
-    newBotRecord = JSON.parse(JSON.stringify(newBotRecord));
-    newBotRecord.reply = newDefaultReply;
 
     return newBotRecord;
   }
@@ -70,9 +87,12 @@ module.exports = class UserService {
       text: replyText,
     });
 
+    botRecord.replies.push(newReply._id);
+
+    await botRecord.save();
     await newReply.save();
 
-    return botRecord;
+    return newReply;
   }
 
   async deleteReply(user, instagramUrl, replyId) {
@@ -81,15 +101,19 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
 
-    let botRecord = await BotModel.findOne({
-      userCreated: userRecord._id,
-      instagramUrl: instagramUrl,
-    });
+    let botRecord = await BotModel.findOneAndUpdate(
+      {
+        userCreated: userRecord._id,
+        instagramUrl: instagramUrl,
+      },
+      { $pull: { replies: replyId } }
+    );
     if (!botRecord) throw new ServiceError("invalid bot");
 
     let replyRecord = await ReplyModel.findByIdAndDelete(replyId);
     if (!replyRecord) throw new ServiceError("invalid reply");
 
+    await botRecord.save();
     return replyRecord;
   }
 

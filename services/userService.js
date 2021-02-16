@@ -46,7 +46,7 @@ module.exports = class UserService {
   }
 
   async verify(user) {
-    //after email verified
+    //after verified by email
     let userRecord = await UserModel.findOne({
       email: user.email,
     });

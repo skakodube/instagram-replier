@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+//TODO separate first and surname
 const UserModel = mongoose.model(
   "User",
   new mongoose.Schema({
@@ -28,6 +28,7 @@ const UserModel = mongoose.model(
       type: Date,
       default: Date.now,
     },
+    bots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
   })
 );
 

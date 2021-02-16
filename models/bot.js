@@ -12,9 +12,11 @@ const botSchema = new mongoose.Schema({
     default: Date.now,
   },
   instagramUrl: String,
+  replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
 }).pre("findOneAndDelete", async function (next) {
   //CASCADE DELETION OF REPLIES
   const docToDelete = await this.model.findOne(this.getQuery());
+  if (!docToDelete) return;
   await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec();
   next();
 });

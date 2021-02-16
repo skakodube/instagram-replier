@@ -72,4 +72,20 @@ function generateJwtToken(user) {
   return token;
 }
 
+router.post(
+  "/resetpassword",
+  [
+    celebrate({
+      body: {
+        email: Joi.string().required().min(5).max(255).email(),
+      },
+    }),
+  ],
+  async (req, res) => {
+    const emailService = new EmailService();
+    await emailService.sendResetPasswordEmail(req.body);
+    res.send("OK");
+  }
+);
+
 module.exports = router;
