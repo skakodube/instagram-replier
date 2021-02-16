@@ -4,8 +4,6 @@ const ReplyModel = require("../models/reply");
 const ServiceError = require("../errors/serviceError");
 const _ = require("lodash");
 
-//SHOULD ONLY VERIFIED USERS?
-
 module.exports = class UserService {
   async getBots(user) {
     const userBotsReplies = await UserModel.findOne({
@@ -35,6 +33,7 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let newBotRecord = await BotModel.findOne({
       instagramUrl: instagramUrl,
@@ -59,6 +58,7 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOneAndDelete({
       userCreated: userRecord._id,
@@ -74,6 +74,7 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOne({
       userCreated: userRecord._id,
@@ -100,6 +101,7 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOneAndUpdate(
       {
@@ -122,6 +124,7 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOne({
       userCreated: userRecord._id,

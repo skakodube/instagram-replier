@@ -14,6 +14,9 @@ module.exports = function (err, req, res, next) {
       case "access denied":
         statusCode = 403;
         break;
+      case "user is not verified":
+        statusCode = 403;
+        break;
       case "user already registered":
         statusCode = 400;
         break;

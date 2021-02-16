@@ -73,6 +73,7 @@ function generateJwtToken(user) {
 }
 
 router.post(
+  //not ready
   "/resetpassword",
   [
     celebrate({

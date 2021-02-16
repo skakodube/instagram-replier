@@ -22,7 +22,10 @@ const UserModel = mongoose.model(
       minlength: 5,
       maxlength: 1024,
     },
-    verified: Boolean,
+    verified: {
+      type: Boolean,
+      default: false,
+    },
     isAdmin: Boolean,
     dateRegistered: {
       type: Date,
