@@ -3,17 +3,42 @@ const router = express.Router();
 const { celebrate, Joi } = require("celebrate");
 Joi.objectId = require("joi-objectid")(Joi);
 const BotService = require("../services/botService");
-const _ = require("lodash");
 const auth = require("../middleware/auth");
+
+//TODO:
+//add users searcher by email for invites
 
 router.get("/", [auth], async (req, res) => {
   const botService = new BotService();
-  let bots = await botService.getBots(req.user);
+
+  const bots = await botService.getBots(req.user);
+
   res.send(bots);
 });
 
 router.post(
-  "/new",
+  //TODO:
+  //get or post?
+  "/replies",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const replies = await botService.getRepliesByBot(req.user, botId);
+
+    res.send(replies);
+  }
+);
+
+router.post(
+  "/create",
   [
     celebrate({
       body: {
@@ -25,9 +50,12 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const newBot = await botService.createBot(req.user, req.body.instagramUrl);
+    const createdBot = await botService.createBot(
+      req.user,
+      req.body.instagramUrl
+    );
 
-    res.send(newBot);
+    res.send(createdBot);
   }
 );
 
@@ -36,7 +64,7 @@ router.delete(
   [
     celebrate({
       body: {
-        instagramUrl: Joi.string().required(),
+        botId: Joi.objectId().required(),
       },
     }),
     auth,
@@ -44,20 +72,20 @@ router.delete(
   async (req, res) => {
     const botService = new BotService();
 
-    const bot = await botService.deleteBot(req.user, req.body.instagramUrl);
+    const deletedBot = await botService.deleteBot(req.user, req.body.botId);
 
-    res.send(bot);
+    res.send(deletedBot);
   }
 );
 
 router.post(
-  "/addreply",
+  "/add-reply",
   [
     celebrate({
       body: {
-        instagramUrl: Joi.string().required(),
+        botId: Joi.objectId().required(),
         keywords: Joi.array().items(Joi.string()).required().min(1),
-        replyText: Joi.string().required(),
+        reply: Joi.string().required(),
       },
     }),
     auth,
@@ -65,23 +93,23 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const reply = await botService.addReply(
+    const addedReply = await botService.addReply(
       req.user,
-      req.body.instagramUrl,
+      req.body.botId,
       req.body.keywords,
-      req.body.replyText
+      req.body.reply
     );
 
-    res.send(reply);
+    res.send(addedReply);
   }
 );
 
 router.delete(
-  "/deletereply",
+  "/delete-reply",
   [
     celebrate({
       body: {
-        instagramUrl: Joi.string().required(),
+        botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
       },
     }),
@@ -90,25 +118,25 @@ router.delete(
   async (req, res) => {
     const botService = new BotService();
 
-    const reply = await botService.deleteReply(
+    const deletedReply = await botService.deleteReply(
       req.user,
-      req.body.instagramUrl,
+      req.body.botId,
       req.body.replyId
     );
 
-    res.send(reply);
+    res.send(deletedReply);
   }
 );
 
 router.put(
-  "/modifyreply",
+  "/edit-reply",
   [
     celebrate({
       body: {
-        instagramUrl: Joi.string().required(),
+        botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
         keywords: Joi.array().items(Joi.string()).required().min(1),
-        replyText: Joi.string().required(),
+        reply: Joi.string().required(),
       },
     }),
     auth,
@@ -116,24 +144,64 @@ router.put(
   async (req, res) => {
     const botService = new BotService();
 
-    const reply = await botService.modifyReply(
+    const editedReply = await botService.editReply(
       req.user,
-      req.body.instagramUrl,
+      req.body.botId,
       req.body.replyId,
       req.body.keywords,
-      req.body.replyText
+      req.body.reply
     );
 
-    res.send(reply);
+    res.send(editedReply);
   }
 );
 
-// router.get("/", [auth], async (req, res) => {
-//   const userService = new UserService();
+router.post(
+  "/invite-moderator",
+  [
+    celebrate({
+      body: {
+        userToInviteId: Joi.objectId().required(),
+        botId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
 
-//   const userRecord = await userService.getMe(req.user);
+    const result = await botService.inviteModerator(
+      req.user,
+      req.body.userToInviteId,
+      req.body.botId
+    );
 
-//   res.send(_.pick(userRecord, ["name", "email"]));
-// });
+    res.send(result);
+  }
+);
+
+router.post(
+  "/remove-moderator",
+  [
+    celebrate({
+      body: {
+        userToInviteId: Joi.objectId().required(),
+        botId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const result = await botService.removeModerator(
+      req.user,
+      req.body.userToInviteId,
+      req.body.botId
+    );
+
+    res.send(result);
+  }
+);
 
 module.exports = router;

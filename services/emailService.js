@@ -4,6 +4,7 @@ const ServiceError = require("../errors/serviceError");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const welcomeTemplate = "d-a4049454ef304608b860316272e372a5";
+const resetPasswordTemplate = "d-8c338d1c57514441924f40efe53138f5";
 const emailFrom = "instagram.replier@gmail.com";
 
 module.exports = class EmailService {
@@ -17,7 +18,7 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
-        name: userRecord.name,
+        name: userRecord.firstName,
       },
       template_id: welcomeTemplate,
     };
@@ -27,7 +28,7 @@ module.exports = class EmailService {
     });
   }
 
-  async sendResetPasswordEmail(user) {
+  async sendRecoverEmail(user) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -36,7 +37,7 @@ module.exports = class EmailService {
     let msg = {
       to: userRecord.email,
       from: emailFrom,
-      template_id: welcomeTemplate,
+      template_id: resetPasswordTemplate,
     };
 
     await sgMail.send(msg).catch(() => {

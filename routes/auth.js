@@ -8,12 +8,16 @@ const EmailService = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 
+//TODO:
+//move generateJWTtoken?
+
 router.post(
-  "/signup",
+  "/register",
   [
     celebrate({
       body: {
-        name: Joi.string().required().max(50).min(5),
+        firstName: Joi.string().required().max(50).min(2),
+        lastName: Joi.string().required().max(50).min(2),
         email: Joi.string().required().min(5).max(255).email(),
         password: passwordComplexity({
           min: 5,
@@ -33,9 +37,7 @@ router.post(
     const newUserRecord = await userService.signup(req.body);
 
     const token = generateJwtToken(newUserRecord);
-    res
-      .header("x-auth-token", token)
-      .send(_.pick(newUserRecord, ["name", "email"]));
+    res.header("x-auth-token", token).send(newUserRecord);
 
     const emailService = new EmailService();
 
@@ -58,9 +60,7 @@ router.post(
     const loginedUserRecord = await userService.login(req.body);
 
     const token = generateJwtToken(loginedUserRecord);
-    res
-      .header("x-auth-token", token)
-      .send(_.pick(loginedUserRecord, ["name", "email"]));
+    res.header("x-auth-token", token).send(loginedUserRecord);
   }
 );
 
@@ -73,8 +73,7 @@ function generateJwtToken(user) {
 }
 
 router.post(
-  //not ready
-  "/resetpassword",
+  "/send-recover-email",
   [
     celebrate({
       body: {
@@ -84,7 +83,27 @@ router.post(
   ],
   async (req, res) => {
     const emailService = new EmailService();
-    await emailService.sendResetPasswordEmail(req.body);
+    await emailService.sendRecoverEmail(req.body);
+    res.send("OK");
+  }
+);
+
+router.put(
+  "/reset-password",
+  //after email
+  [
+    celebrate({
+      body: {
+        email: Joi.string().required().min(5).max(255).email(),
+        password: Joi.string().required().min(5).max(1024),
+      },
+    }),
+  ],
+  async (req, res) => {
+    const userService = new UserService();
+
+    await userService.resetPassword(req.body.email, req.body.password);
+
     res.send("OK");
   }
 );

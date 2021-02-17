@@ -1,26 +1,45 @@
 const mongoose = require("mongoose");
-const ReplyModel = require("./reply");
+const UserModel = require("./user");
 
-const botSchema = new mongoose.Schema({
-  userCreated: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+//TODO:
+//add active
+
+const BotSchema = new mongoose.Schema(
+  {
+    userCreated: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    instagramUrl: String,
+    replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
+    userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
-  dateCreated: {
-    type: Date,
-    default: Date.now,
-  },
-  instagramUrl: String,
-  replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
-}).pre("findOneAndDelete", async function (next) {
-  //CASCADE DELETION OF REPLIES
+  { timestamps: true }
+);
+
+BotSchema.pre("findOneAndDelete", async function (next) {
   const docToDelete = await this.model.findOne(this.getQuery());
   if (!docToDelete) return;
-  await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec();
+  // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec(); *circular depedency error*
+  await UserModel.findOneAndUpdate(
+    {
+      OwnedBots: { $eq: docToDelete._id },
+    },
+    {
+      $pull: { OwnedBots: docToDelete._id },
+    }
+  ).exec();
+  await UserModel.updateMany(
+    {
+      InvitedBots: { $eq: docToDelete._id },
+    },
+    {
+      $pull: { InvitedBots: docToDelete._id },
+    },
+    { multi: true }
+  ).exec();
   next();
 });
 
-const BotModel = mongoose.model("Bot", botSchema);
-
-module.exports = BotModel;
+module.exports = mongoose.model("Bot", BotSchema);

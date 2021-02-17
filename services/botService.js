@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const UserModel = require("../models/user");
 const BotModel = require("../models/bot");
 const ReplyModel = require("../models/reply");
@@ -6,26 +7,29 @@ const _ = require("lodash");
 
 module.exports = class UserService {
   async getBots(user) {
-    const userBotsReplies = await UserModel.findOne({
+    const userRecordAndBots = await UserModel.findOne({
       email: user.email,
     })
       .populate([
         {
-          path: "bots",
+          path: "OwnedBots",
           model: "Bot",
-          select: "dateCreated instagramUrl",
-          populate: {
-            path: "replies",
-            model: "Reply",
-            select: "keywords text",
-          },
+          select: "_id dateCreated instagramUrl",
         },
       ])
-      .select("email name verified isAdmin dateRegistered");
+      .populate([
+        {
+          path: "bots",
+          model: "Bot",
+          InvitedBots: "_id dateCreated instagramUrl",
+        },
+      ])
+      .select("email firstName lastName verified isAdmin dateRegistered");
+    if (!userRecordAndBots) throw new ServiceError("user doesn't exist");
+    if (!userRecordAndBots.verified)
+      throw new ServiceError("user is not verified");
 
-    if (!userBotsReplies) throw new ServiceError("user doesn't exist");
-
-    return userBotsReplies;
+    return userRecordAndBots;
   }
 
   async createBot(user, instagramUrl) {
@@ -45,31 +49,75 @@ module.exports = class UserService {
       instagramUrl: instagramUrl,
     });
 
-    userRecord.bots.push(newBotRecord._id);
+    userRecord.OwnedBots.push(newBotRecord._id);
 
     await userRecord.save();
     await newBotRecord.save();
 
-    return newBotRecord;
+    return _.pick(newBotRecord, [
+      "_id",
+      "instagramUrl",
+      "replies",
+      "userCreated",
+      "createdAt",
+    ]);
   }
 
-  async deleteBot(user, instagramUrl) {
+  async deleteBot(user, botToDeleteId) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
     if (!userRecord.verified) throw new ServiceError("user is not verified");
 
-    let botRecord = await BotModel.findOneAndDelete({
+    let oldBotRecord = await BotModel.findOneAndDelete({
+      _id: mongoose.Types.ObjectId(botToDeleteId),
       userCreated: userRecord._id,
-      instagramUrl: instagramUrl,
     });
-    if (!botRecord) throw new ServiceError("invalid bot");
+    if (!oldBotRecord) throw new ServiceError("invalid bot");
 
-    return botRecord;
+    await ReplyModel.deleteMany({ botBelongs: oldBotRecord._id });
+
+    return _.pick(oldBotRecord, [
+      "_id",
+      "instagramUrl",
+      "replies",
+      "userCreated",
+      "updatedAt",
+    ]);
   }
 
-  async addReply(user, instagramUrl, keywords, replyText) {
+  async getRepliesByBot(user, botId) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord.verified) throw new ServiceError("user is not verified");
+
+    const botRecordAndReplies = await BotModel.findById({
+      botId,
+    })
+      .populate([
+        {
+          path: "replies",
+          model: "Reply",
+          select: "_id keywords answer",
+        },
+      ])
+      .populate([
+        {
+          path: "userModerators",
+          model: "User",
+          select: "_id email firstName lastName",
+        },
+      ])
+      .select("userCreated instagramUrl createdAt");
+    if (!botRecordAndReplies) throw new ServiceError("bot doesn't exist");
+
+    return botRecordAndReplies;
+  }
+
+  async addReply(user, botId, keywords, newAnswer) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -77,15 +125,15 @@ module.exports = class UserService {
     if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOne({
+      _id: botId,
       userCreated: userRecord._id,
-      instagramUrl: instagramUrl,
     });
     if (!botRecord) throw new ServiceError("invalid bot");
 
     let newReply = new ReplyModel({
       botBelongs: botRecord._id,
       keywords: keywords,
-      text: replyText,
+      answer: newAnswer,
     });
 
     botRecord.replies.push(newReply._id);
@@ -93,33 +141,44 @@ module.exports = class UserService {
     await botRecord.save();
     await newReply.save();
 
-    return newReply;
+    return _.pick(newReply, [
+      "_id",
+      "answer",
+      "keywords",
+      "botBelogs",
+      "createdAt",
+    ]);
   }
 
-  async deleteReply(user, instagramUrl, replyId) {
+  async deleteReply(user, botId, replyId) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
     if (!userRecord.verified) throw new ServiceError("user is not verified");
 
-    let botRecord = await BotModel.findOneAndUpdate(
-      {
-        userCreated: userRecord._id,
-        instagramUrl: instagramUrl,
-      },
-      { $pull: { replies: replyId } }
-    );
+    const botRecord = await BotModel.findOne({
+      _id: mongoose.Types.ObjectId(botId),
+      userCreated: userRecord._id,
+    });
     if (!botRecord) throw new ServiceError("invalid bot");
 
-    let replyRecord = await ReplyModel.findByIdAndDelete(replyId);
-    if (!replyRecord) throw new ServiceError("invalid reply");
+    const deletedReplyRecord = await ReplyModel.findOneAndDelete({
+      _id: mongoose.Types.ObjectId(replyId),
+      botBelongs: botRecord._id,
+    });
+    if (!deletedReplyRecord) throw new ServiceError("invalid reply");
 
-    await botRecord.save();
-    return replyRecord;
+    return _.pick(deletedReplyRecord, [
+      "_id",
+      "answer",
+      "keywords",
+      "botBelogs",
+      "createdAt",
+    ]);
   }
 
-  async modifyReply(user, instagramUrl, replyId, keywords, replyText) {
+  async editReply(user, botId, replyId, keywords, newAnswer) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -127,21 +186,132 @@ module.exports = class UserService {
     if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     let botRecord = await BotModel.findOne({
+      _id: botId,
       userCreated: userRecord._id,
-      instagramUrl: instagramUrl,
     });
     if (!botRecord) throw new ServiceError("invalid bot");
 
-    let replyRecord = await ReplyModel.findByIdAndUpdate(
+    let editedReplyRecord = await ReplyModel.findByIdAndUpdate(
       replyId,
       {
         keywords: keywords,
-        text: replyText,
+        answer: newAnswer,
       },
       { new: true }
     );
-    if (!replyRecord) throw new ServiceError("invalid reply");
+    if (!editedReplyRecord) throw new ServiceError("invalid reply");
 
-    return replyRecord;
+    return _.pick(editedReplyRecord, [
+      "_id",
+      "answer",
+      "keywords",
+      "botBelogs",
+      "createdAt",
+    ]);
+  }
+
+  async inviteModerator(userOwner, userToInviteId, botId) {
+    const userOwnerRecord = await UserModel.findOne({
+      email: userOwner.email,
+    });
+    if (!userOwnerRecord) throw new ServiceError("user doesn't exist");
+    if (!userOwnerRecord.verified)
+      throw new ServiceError("user is not verified");
+
+    const userToInviteRecord = await UserModel.findById(userToInviteId);
+    if (!userToInviteRecord) throw new ServiceError("user doesn't exist");
+    if (!userToInviteRecord.verified)
+      throw new ServiceError("user is not verified");
+
+    const botRecord = await BotModel.findOne({
+      _id: botId,
+      userCreated: userOwnerRecord._id,
+      userModerators: { $ne: userToInviteRecord._id },
+    });
+    if (!botRecord)
+      throw new ServiceError("invalid bot or user is already invited");
+
+    userToInviteRecord.InvitedBots.push(botRecord._id);
+    botRecord.userModerators.push(userToInviteRecord._id);
+
+    await userToInviteRecord.save();
+    await botRecord.save();
+
+    return _.pick(botRecord, [
+      "_id",
+      "instagramUrl",
+      "replies",
+      "userCreated",
+      "userModerators",
+      "createdAt",
+    ]);
+  }
+
+  async removeModerator(userOwner, userToRemoveId, botId) {
+    const userOwnerRecord = await UserModel.findOne({
+      email: userOwner.email,
+    });
+    if (!userOwnerRecord) throw new ServiceError("user doesn't exist");
+    if (!userOwnerRecord.verified)
+      throw new ServiceError("user is not verified");
+
+    const userToRemoveRecord = await UserModel.findById(userToRemoveId);
+    if (!userToRemoveRecord) throw new ServiceError("user doesn't exist");
+    if (!userToRemoveRecord.verified)
+      throw new ServiceError("user is not verified");
+
+    const botRecord = await BotModel.findOneAndUpdate(
+      {
+        _id: mongoose.Types.ObjectId(botId),
+        userCreated: userOwnerRecord._id,
+        userModerators: { $eq: userToRemoveRecord._id },
+      },
+      {
+        $pull: { userModerators: userToRemoveRecord._id },
+      },
+      { new: true }
+    );
+
+    await UserModel.updateOne(
+      { _id: userToRemoveRecord._id },
+      { $pull: { InvitedBots: botRecord._id } }
+    );
+
+    if (!botRecord)
+      throw new ServiceError("invalid bot or user is already invited");
+
+    return _.pick(botRecord, [
+      "_id",
+      "instagramUrl",
+      "replies",
+      "userCreated",
+      "userModerators",
+      "createdAt",
+    ]);
   }
 };
+
+// async getBotsAndReplies(user) {
+//   //TODO:
+//   //shorten return data
+//   const userBotsReplies = await UserModel.findOne({
+//     email: user.email,
+//   })
+//     .populate([
+//       {
+//         path: "bots",
+//         model: "Bot",
+//         select: "dateCreated instagramUrl",
+//         populate: {
+//           path: "replies",
+//           model: "Reply",
+//           select: "keywords answer",
+//         },
+//       },
+//     ])
+//     .select("email firstName lastName verified isAdmin dateRegistered");
+
+//   if (!userBotsReplies) throw new ServiceError("user doesn't exist");
+
+//   return userBotsReplies;
+// }

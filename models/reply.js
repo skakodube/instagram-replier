@@ -1,8 +1,9 @@
+const BotModel = require("./bot.js");
 const mongoose = require("mongoose");
-//TODO unique keyword?
-const ReplyModel = mongoose.model(
-  "Reply",
-  new mongoose.Schema({
+
+//TODO unique keywords?
+const ReplySchema = new mongoose.Schema(
+  {
     botBelongs: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bot",
@@ -12,11 +13,27 @@ const ReplyModel = mongoose.model(
       type: Array,
       required: true,
     },
-    text: {
+    answer: {
       type: String,
       required: true,
     },
-  })
+  },
+  { timestamps: true }
 );
 
-module.exports = ReplyModel;
+ReplySchema.pre("findOneAndDelete", async function (next) {
+  const docToDelete = await this.model.findOne(this.getQuery());
+  if (!docToDelete) return;
+
+  await BotModel.findOneAndUpdate(
+    {
+      replies: { $eq: docToDelete._id },
+    },
+    {
+      $pull: { replies: docToDelete._id },
+    }
+  ).exec();
+  next();
+});
+
+module.exports = mongoose.model("Reply", ReplySchema);

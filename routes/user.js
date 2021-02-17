@@ -7,6 +7,8 @@ const EmailService = require("../services/emailService");
 const _ = require("lodash");
 const auth = require("../middleware/auth");
 
+//TODO format links to dash look
+
 router.get("/me", [auth], async (req, res) => {
   const userService = new UserService();
 
@@ -15,7 +17,7 @@ router.get("/me", [auth], async (req, res) => {
   res.send(userRecord);
 });
 
-router.post("/sendVerifyEmail", [auth], async (req, res) => {
+router.post("/send-verify-email", [auth], async (req, res) => {
   const emailService = new EmailService();
 
   await emailService.sendVerificationEmail(req.user);
@@ -23,12 +25,36 @@ router.post("/sendVerifyEmail", [auth], async (req, res) => {
   res.send("OK");
 });
 
-router.post("/verify", [auth], async (req, res) => {
+router.put(
+  "/edit",
+  [
+    celebrate({
+      body: {
+        firstName: Joi.string().required().max(50).min(2),
+        lastName: Joi.string().required().max(50).min(2),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const userService = new UserService();
+
+    userEdited = await userService.edit(
+      req.user,
+      req.body.firstName,
+      req.body.lastName
+    );
+
+    res.send(userEdited);
+  }
+);
+
+router.post("/activate-account", [auth], async (req, res) => {
   const userService = new UserService();
 
-  verifiedStatus = await userService.verify(req.user);
+  verifiedStatus = await userService.activateAccount(req.user);
 
-  res.send({ verifiedStatus: verifiedStatus });
+  res.send(verifiedStatus);
 });
 
 module.exports = router;

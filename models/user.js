@@ -1,12 +1,18 @@
 const mongoose = require("mongoose");
-//TODO separate first and surname
-const UserModel = mongoose.model(
-  "User",
-  new mongoose.Schema({
-    name: {
+const bcrypt = require("bcrypt");
+
+const UserSchema = new mongoose.Schema(
+  {
+    firstName: {
       type: String,
       require: true,
-      minlength: 5,
+      minlength: 2,
+      maxlength: 50,
+    },
+    lastName: {
+      type: String,
+      require: true,
+      minlength: 2,
       maxlength: 50,
     },
     email: {
@@ -26,13 +32,31 @@ const UserModel = mongoose.model(
       type: Boolean,
       default: false,
     },
-    isAdmin: Boolean,
-    dateRegistered: {
-      type: Date,
-      default: Date.now,
-    },
-    bots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
-  })
+    OwnedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
+    InvitedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
+  },
+  { timestamps: true }
 );
 
-module.exports = UserModel;
+UserSchema.pre("save", function (next) {
+  const user = this;
+
+  if (!user.isModified("password")) return next();
+
+  bcrypt.genSalt(10, function (err, salt) {
+    if (err) return next(err);
+
+    bcrypt.hash(user.password, salt, function (err, hash) {
+      if (err) return next(err);
+
+      user.password = hash;
+      next();
+    });
+  });
+});
+
+UserSchema.methods.comparePassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
+
+module.exports = mongoose.model("User", UserSchema);

@@ -1,7 +1,6 @@
 const UserModel = require("../models/user");
 const ServiceError = require("../errors/serviceError");
 const _ = require("lodash");
-const bcrypt = require("bcrypt");
 
 module.exports = class UserService {
   async signup(user) {
@@ -11,14 +10,20 @@ module.exports = class UserService {
     if (userRecord) throw new ServiceError("user already registered");
 
     userRecord = new UserModel(
-      _.pick(user, ["name", "email", "password", "isAdmin"])
+      _.pick(user, ["firstName", "lastName", "email", "password", "isAdmin"])
     );
-    const salt = await bcrypt.genSalt(10);
-    userRecord.password = await bcrypt.hash(userRecord.password, salt);
+    userRecord.password = await userRecord.password;
 
     await userRecord.save();
 
-    return userRecord;
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
   }
 
   async login(user) {
@@ -27,13 +32,40 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new ServiceError("invalid email or password");
 
-    const validPassword = await bcrypt.compare(
-      user.password,
-      userRecord.password
-    );
+    const validPassword = await userRecord.comparePassword(user.password);
     if (!validPassword) throw new ServiceError("invalid email or password");
 
-    return userRecord;
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
+  }
+
+  async edit(user, newFirstName, newLastName) {
+    let userRecord = await UserModel.findOneAndUpdate(
+      {
+        email: user.email,
+      },
+      {
+        firstName: newFirstName,
+        lastName: newLastName,
+      },
+      { new: true }
+    );
+    if (!userRecord) throw new ServiceError("invalid email or password");
+
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
   }
 
   async getMe(user) {
@@ -42,10 +74,17 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new ServiceError("user doesn't exist");
 
-    return _.pick(userRecord, ["name", "email"]);
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
   }
 
-  async verify(user) {
+  async activateAccount(user) {
     //after verified by email
     let userRecord = await UserModel.findOne({
       email: user.email,
@@ -56,6 +95,19 @@ module.exports = class UserService {
 
     await userRecord.save();
 
-    return userRecord.verified;
+    return _.pick(userRecord, ["verified"]);
+  }
+
+  async resetPassword(email, newPassword) {
+    let userRecord = await UserModel.findOne({
+      email: email,
+    });
+    if (!userRecord) throw new ServiceError("invalid email or password");
+
+    userRecord.password = await newPassword;
+
+    await userRecord.save();
+
+    return userRecord;
   }
 };
