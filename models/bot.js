@@ -1,9 +1,6 @@
 const mongoose = require("mongoose");
 const UserModel = require("./user");
 
-//TODO:
-//add active
-
 const BotSchema = new mongoose.Schema(
   {
     userCreated: {
@@ -12,6 +9,10 @@ const BotSchema = new mongoose.Schema(
       required: true,
     },
     instagramUrl: String,
+    active: {
+      type: Boolean,
+      default: false,
+    },
     replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
     userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
@@ -21,7 +22,6 @@ const BotSchema = new mongoose.Schema(
 BotSchema.pre("findOneAndDelete", async function (next) {
   const docToDelete = await this.model.findOne(this.getQuery());
   if (!docToDelete) return;
-  // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec(); *circular depedency error*
   await UserModel.findOneAndUpdate(
     {
       OwnedBots: { $eq: docToDelete._id },
@@ -40,6 +40,7 @@ BotSchema.pre("findOneAndDelete", async function (next) {
     { multi: true }
   ).exec();
   next();
+  // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec(); *circular depedency error*
 });
 
 module.exports = mongoose.model("Bot", BotSchema);

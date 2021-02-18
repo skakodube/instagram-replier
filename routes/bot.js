@@ -17,27 +17,6 @@ router.get("/", [auth], async (req, res) => {
 });
 
 router.post(
-  //TODO:
-  //get or post?
-  "/replies",
-  [
-    celebrate({
-      body: {
-        botId: Joi.objectId().required(),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
-    const botService = new BotService();
-
-    const replies = await botService.getRepliesByBot(req.user, botId);
-
-    res.send(replies);
-  }
-);
-
-router.post(
   "/create",
   [
     celebrate({
@@ -75,6 +54,29 @@ router.delete(
     const deletedBot = await botService.deleteBot(req.user, req.body.botId);
 
     res.send(deletedBot);
+  }
+);
+
+//=========================Replies=========================//
+
+router.post(
+  //TODO:
+  //get or post?
+  "/replies",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const replies = await botService.getRepliesByBot(req.user, botId);
+
+    res.send(replies);
   }
 );
 
@@ -155,6 +157,8 @@ router.put(
     res.send(editedReply);
   }
 );
+
+//=========================Moderators=========================//
 
 router.post(
   "/invite-moderator",

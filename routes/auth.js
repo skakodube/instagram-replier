@@ -7,10 +7,10 @@ const UserService = require("../services/userService");
 const EmailService = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
+const auth = require("../middleware/auth");
 
 //TODO:
-//move generateJWTtoken?
-
+//move generateJWTtoken to model and expirate
 router.post(
   "/register",
   [
@@ -29,6 +29,7 @@ router.post(
           requirementCount: 2,
         }).required(),
         isAdmin: Joi.boolean(),
+        verificationLink: Joi.string().required().min(1).max(255),
       },
     }),
   ],
@@ -40,8 +41,10 @@ router.post(
     res.header("x-auth-token", token).send(newUserRecord);
 
     const emailService = new EmailService();
-
-    emailService.sendVerificationEmail(req.body);
+    await emailService.sendVerificationEmail(
+      newUserRecord,
+      req.body.verificationLink
+    );
   }
 );
 
@@ -72,37 +75,50 @@ function generateJwtToken(user) {
   return token;
 }
 
+//=========================RecoverPassword=========================//
+
 router.post(
   "/send-recover-email",
   [
     celebrate({
       body: {
         email: Joi.string().required().min(5).max(255).email(),
+        link: Joi.string().required().min(1).max(255),
       },
     }),
   ],
   async (req, res) => {
     const emailService = new EmailService();
-    await emailService.sendRecoverEmail(req.body);
+    await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
     res.send("OK");
   }
 );
 
-router.put(
+router.post(
   "/reset-password",
-  //after email
   [
     celebrate({
       body: {
-        email: Joi.string().required().min(5).max(255).email(),
-        password: Joi.string().required().min(5).max(1024),
+        token: Joi.string().required(),
+        password: passwordComplexity({
+          min: 5,
+          max: 255,
+          lowerCase: 0,
+          upperCase: 0,
+          numeric: 0,
+          symbol: 0,
+          requirementCount: 2,
+        }).required(),
       },
     }),
   ],
   async (req, res) => {
     const userService = new UserService();
 
-    await userService.resetPassword(req.body.email, req.body.password);
+    await userService.resetPasswordByEmailtoken(
+      req.body.token,
+      req.body.password
+    );
 
     res.send("OK");
   }

@@ -12,7 +12,7 @@ module.exports = class UserService {
     userRecord = new UserModel(
       _.pick(user, ["firstName", "lastName", "email", "password", "isAdmin"])
     );
-    userRecord.password = await userRecord.password;
+    userRecord.password = user.password;
 
     await userRecord.save();
 
@@ -84,13 +84,16 @@ module.exports = class UserService {
     ]);
   }
 
-  async activateAccount(user) {
-    //after verified by email
-    let userRecord = await UserModel.findOne({
+  async activateAccount(user, token) {
+    const userRecord = await UserModel.findOne({
       email: user.email,
+      resetToken: token,
+      resetExpires: { $gt: Date.now() },
     });
-    if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
 
+    userRecord.resetToken = undefined;
+    userRecord.resetExpires = undefined;
     userRecord.verified = true;
 
     await userRecord.save();
@@ -98,13 +101,50 @@ module.exports = class UserService {
     return _.pick(userRecord, ["verified"]);
   }
 
-  async resetPassword(email, newPassword) {
+  async resetPasswordByEmailtoken(token, password) {
+    const userRecord = await UserModel.findOne({
+      resetToken: token,
+      resetExpires: { $gt: Date.now() },
+    });
+    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+
+    userRecord.password = password;
+    userRecord.resetToken = undefined;
+    userRecord.resetExpires = undefined;
+
+    await userRecord.save();
+
+    return;
+  }
+
+  async resetPasswordByPassword(user, oldPassword, newPassword) {
     let userRecord = await UserModel.findOne({
-      email: email,
+      email: user.email,
     });
     if (!userRecord) throw new ServiceError("invalid email or password");
 
-    userRecord.password = await newPassword;
+    const validPassword = await userRecord.comparePassword(oldPassword);
+    if (!validPassword) throw new ServiceError("invalid email or password");
+
+    userRecord.password = newPassword;
+
+    await userRecord.save();
+
+    return;
+  }
+
+  async changeEmailByToken(user, token) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+      resetToken: token,
+      resetExpires: { $gt: Date.now() },
+    });
+    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+
+    userRecord.email = userRecord.tempEmail;
+    userRecord.tempEmail = undefined;
+    userRecord.resetToken = undefined;
+    userRecord.resetExpires = undefined;
 
     await userRecord.save();
 

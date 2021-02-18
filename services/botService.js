@@ -21,7 +21,7 @@ module.exports = class UserService {
         {
           path: "bots",
           model: "Bot",
-          InvitedBots: "_id dateCreated instagramUrl",
+          InvitedBots: "_id dateCreated instagramUrl active",
         },
       ])
       .select("email firstName lastName verified isAdmin dateRegistered");
@@ -57,6 +57,7 @@ module.exports = class UserService {
     return _.pick(newBotRecord, [
       "_id",
       "instagramUrl",
+      "active",
       "replies",
       "userCreated",
       "createdAt",
@@ -80,6 +81,7 @@ module.exports = class UserService {
 
     return _.pick(oldBotRecord, [
       "_id",
+      "active",
       "instagramUrl",
       "replies",
       "userCreated",
@@ -111,13 +113,13 @@ module.exports = class UserService {
           select: "_id email firstName lastName",
         },
       ])
-      .select("userCreated instagramUrl createdAt");
+      .select("userCreated instagramUrl active createdAt");
     if (!botRecordAndReplies) throw new ServiceError("bot doesn't exist");
 
     return botRecordAndReplies;
   }
 
-  async addReply(user, botId, keywords, newAnswer) {
+  async addReply(user, botId, newKeywords, newAnswer) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -132,9 +134,10 @@ module.exports = class UserService {
 
     let newReply = new ReplyModel({
       botBelongs: botRecord._id,
-      keywords: keywords,
+      keywords: newKeywords,
       answer: newAnswer,
     });
+    // {$addToSet: {users: userOid}}
 
     botRecord.replies.push(newReply._id);
 
@@ -240,6 +243,7 @@ module.exports = class UserService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "active",
       "replies",
       "userCreated",
       "userModerators",
@@ -283,6 +287,7 @@ module.exports = class UserService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "active",
       "replies",
       "userCreated",
       "userModerators",

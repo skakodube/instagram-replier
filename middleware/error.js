@@ -17,8 +17,14 @@ module.exports = function (err, req, res, next) {
       case "user is not verified":
         statusCode = 403;
         break;
+      case "email is already registered":
+        statusCode = 400;
+        break;
       case "user already registered":
         statusCode = 400;
+        break;
+      case "Password reset token is invalid or has expired":
+        statusCode = 401;
         break;
       case "invalid token":
         statusCode = 400;

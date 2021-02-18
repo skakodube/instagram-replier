@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+
+//add email verification
 
 const UserSchema = new mongoose.Schema(
   {
@@ -34,6 +37,19 @@ const UserSchema = new mongoose.Schema(
     },
     OwnedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
     InvitedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
+    tempEmail: {
+      type: String,
+      minlength: 5,
+      maxlength: 50,
+    },
+    resetToken: {
+      type: String,
+      required: false,
+    },
+    resetExpires: {
+      type: Date,
+      required: false,
+    },
   },
   { timestamps: true }
 );
@@ -57,6 +73,11 @@ UserSchema.pre("save", function (next) {
 
 UserSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
+};
+
+UserSchema.methods.generateReset = function () {
+  this.resetToken = crypto.randomBytes(20).toString("hex");
+  this.resetExpires = Date.now() + 3600000; //expires in an hour
 };
 
 module.exports = mongoose.model("User", UserSchema);
