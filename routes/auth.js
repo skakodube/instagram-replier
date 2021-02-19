@@ -8,8 +8,6 @@ const EmailService = require("../services/emailService");
 const jwt = require("../helpers/jwt");
 const _ = require("lodash");
 
-//TODO:
-//move generateJWTtoken to model and expirate
 router.post(
   "/register",
   [
@@ -76,6 +74,7 @@ router.post(
   async (req, res) => {
     const emailService = new EmailService();
     await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
+
     res.send("OK");
   }
 );

@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
-//add email verification
-
 const UserSchema = new mongoose.Schema(
   {
     firstName: {

@@ -9,8 +9,6 @@ const resetPasswordTemplate = "d-8c338d1c57514441924f40efe53138f5";
 const changeEmailTemplate = "d-c4ee6501a9f646a8ab40f566b38f1f81";
 const changeEmailNoticeTemplate = "d-3bf1a7ecc66648d4bf4643dc0ee1c60f";
 
-// separate email from user to userservice???
-
 module.exports = class EmailService {
   async sendVerificationEmail(user, confirmLink) {
     //TODO:

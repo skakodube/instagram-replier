@@ -26,7 +26,7 @@ module.exports = function (err, req, res, next) {
       case "Password reset token is invalid or has expired":
         statusCode = 401;
         break;
-      case "invalid token":
+      case "invalid auth token":
         statusCode = 400;
         break;
       case "couldn't send an email":
