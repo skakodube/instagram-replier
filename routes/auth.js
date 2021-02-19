@@ -5,9 +5,8 @@ Joi.objectId = require("joi-objectid")(Joi);
 const passwordComplexity = require("joi-password-complexity").default;
 const UserService = require("../services/userService");
 const EmailService = require("../services/emailService");
-const jwt = require("jsonwebtoken");
+const jwt = require("../helpers/jwt");
 const _ = require("lodash");
-const auth = require("../middleware/auth");
 
 //TODO:
 //move generateJWTtoken to model and expirate
@@ -35,16 +34,12 @@ router.post(
   ],
   async (req, res) => {
     const userService = new UserService();
-    const newUserRecord = await userService.signup(req.body);
+    const user = await userService.signup(req.body);
 
-    const token = generateJwtToken(newUserRecord);
-    res.header("x-auth-token", token).send(newUserRecord);
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
 
     const emailService = new EmailService();
-    await emailService.sendVerificationEmail(
-      newUserRecord,
-      req.body.verificationLink
-    );
+    await emailService.sendVerificationEmail(user, req.body.verificationLink);
   }
 );
 
@@ -60,20 +55,11 @@ router.post(
   ],
   async (req, res) => {
     const userService = new UserService();
-    const loginedUserRecord = await userService.login(req.body);
+    const user = await userService.login(req.body);
 
-    const token = generateJwtToken(loginedUserRecord);
-    res.header("x-auth-token", token).send(loginedUserRecord);
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
-
-function generateJwtToken(user) {
-  const token = jwt.sign(
-    { email: user.email, isAdmin: user.isAdmin },
-    process.env.JWT_PRIVATE_KEY
-  );
-  return token;
-}
 
 //=========================RecoverPassword=========================//
 

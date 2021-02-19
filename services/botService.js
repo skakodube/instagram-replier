@@ -14,14 +14,14 @@ module.exports = class UserService {
         {
           path: "OwnedBots",
           model: "Bot",
-          select: "_id dateCreated instagramUrl",
+          select: "_id instagramUrl active dateCreated",
         },
       ])
       .populate([
         {
           path: "bots",
           model: "Bot",
-          InvitedBots: "_id dateCreated instagramUrl active",
+          InvitedBots: "_id instagramUrl active dateCreated",
         },
       ])
       .select("email firstName lastName verified isAdmin dateRegistered");
@@ -137,7 +137,7 @@ module.exports = class UserService {
       keywords: newKeywords,
       answer: newAnswer,
     });
-    // {$addToSet: {users: userOid}}
+    // {$addToSet: {users: userOid}} *uniqness* *not work*
 
     botRecord.replies.push(newReply._id);
 

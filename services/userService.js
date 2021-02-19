@@ -98,7 +98,14 @@ module.exports = class UserService {
 
     await userRecord.save();
 
-    return _.pick(userRecord, ["verified"]);
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
   }
 
   async resetPasswordByEmailtoken(token, password) {

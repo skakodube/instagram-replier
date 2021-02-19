@@ -5,9 +5,9 @@ Joi.objectId = require("joi-objectid")(Joi);
 const UserService = require("../services/userService");
 const passwordComplexity = require("joi-password-complexity").default;
 const EmailService = require("../services/emailService");
-const _ = require("lodash");
 const auth = require("../middleware/auth");
-const jwt = require("jsonwebtoken");
+const jwt = require("../helpers/jwt");
+const _ = require("lodash");
 
 router.get("/me", [auth], async (req, res) => {
   const userService = new UserService();
@@ -31,13 +31,13 @@ router.put(
   async (req, res) => {
     const userService = new UserService();
 
-    userEdited = await userService.edit(
+    user = await userService.edit(
       req.user,
       req.body.firstName,
       req.body.lastName
     );
 
-    res.send(userEdited);
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
 
@@ -55,7 +55,9 @@ router.post(
   ],
   async (req, res) => {
     const emailService = new EmailService();
+
     await emailService.sendVerificationEmail(req.user, req.body.link);
+
     res.send("OK");
   }
 );
@@ -73,12 +75,9 @@ router.post(
   async (req, res) => {
     const userService = new UserService();
 
-    const verificationStatus = await userService.activateAccount(
-      req.user,
-      req.body.token
-    );
+    const user = await userService.activateAccount(req.user, req.body.token);
 
-    res.send(verificationStatus);
+    res.send({ user });
   }
 );
 
@@ -167,22 +166,10 @@ router.post(
   async (req, res) => {
     const userService = new UserService();
 
-    const editedUserRecord = await userService.changeEmailByToken(
-      req.user,
-      req.body.token
-    );
+    const user = await userService.changeEmailByToken(req.user, req.body.token);
 
-    const token = generateJwtToken(editedUserRecord);
-    res.header("x-auth-token", token).send(editedUserRecord);
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user: user });
   }
 );
-
-function generateJwtToken(user) {
-  const token = jwt.sign(
-    { email: user.email, isAdmin: user.isAdmin },
-    process.env.JWT_PRIVATE_KEY
-  );
-  return token;
-}
 
 module.exports = router;

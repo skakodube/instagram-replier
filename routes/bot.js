@@ -7,13 +7,14 @@ const auth = require("../middleware/auth");
 
 //TODO:
 //add users searcher by email for invites
+//SEND DATA OR OK?
 
 router.get("/", [auth], async (req, res) => {
   const botService = new BotService();
 
-  const bots = await botService.getBots(req.user);
+  const userAndBots = await botService.getBots(req.user);
 
-  res.send(bots);
+  res.send({ user: userAndBots });
 });
 
 router.post(
@@ -29,12 +30,9 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const createdBot = await botService.createBot(
-      req.user,
-      req.body.instagramUrl
-    );
+    const bot = await botService.createBot(req.user, req.body.instagramUrl);
 
-    res.send(createdBot);
+    res.send({ bot });
   }
 );
 
@@ -51,9 +49,9 @@ router.delete(
   async (req, res) => {
     const botService = new BotService();
 
-    const deletedBot = await botService.deleteBot(req.user, req.body.botId);
+    const bot = await botService.deleteBot(req.user, req.body.botId);
 
-    res.send(deletedBot);
+    res.send({ bot });
   }
 );
 
@@ -74,9 +72,9 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const replies = await botService.getRepliesByBot(req.user, botId);
+    const botAndReplies = await botService.getRepliesByBot(req.user, botId);
 
-    res.send(replies);
+    res.send({ bot: botAndReplies });
   }
 );
 
@@ -95,14 +93,14 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const addedReply = await botService.addReply(
+    const reply = await botService.addReply(
       req.user,
       req.body.botId,
       req.body.keywords,
       req.body.reply
     );
 
-    res.send(addedReply);
+    res.send({ reply });
   }
 );
 
@@ -120,13 +118,13 @@ router.delete(
   async (req, res) => {
     const botService = new BotService();
 
-    const deletedReply = await botService.deleteReply(
+    const reply = await botService.deleteReply(
       req.user,
       req.body.botId,
       req.body.replyId
     );
 
-    res.send(deletedReply);
+    res.send({ reply });
   }
 );
 
@@ -146,7 +144,7 @@ router.put(
   async (req, res) => {
     const botService = new BotService();
 
-    const editedReply = await botService.editReply(
+    const reply = await botService.editReply(
       req.user,
       req.body.botId,
       req.body.replyId,
@@ -154,7 +152,7 @@ router.put(
       req.body.reply
     );
 
-    res.send(editedReply);
+    res.send({ reply });
   }
 );
 
@@ -174,13 +172,13 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const result = await botService.inviteModerator(
+    const bot = await botService.inviteModerator(
       req.user,
       req.body.userToInviteId,
       req.body.botId
     );
 
-    res.send(result);
+    res.send({ bot });
   }
 );
 
@@ -198,13 +196,13 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const result = await botService.removeModerator(
+    const bot = await botService.removeModerator(
       req.user,
       req.body.userToInviteId,
       req.body.botId
     );
 
-    res.send(result);
+    res.send({ bot });
   }
 );
 
