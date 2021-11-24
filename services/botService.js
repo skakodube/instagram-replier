@@ -89,7 +89,8 @@ module.exports = class UserService {
     ]);
   }
 
-  async getRepliesByBot(user, botId) {
+  //TODO: Add Pagination
+  async getRepliesByBot(user, botId, pageNum, pageSize) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -97,13 +98,18 @@ module.exports = class UserService {
     if (!userRecord.verified) throw new ServiceError("user is not verified");
 
     const botRecordAndReplies = await BotModel.findById({
-      botId,
+      _id: mongoose.Types.ObjectId(botId),
     })
       .populate([
         {
           path: "replies",
           model: "Reply",
           select: "_id keywords answer",
+          options: {
+            skip: (pageNum - 1) * pageSize,
+            limit: pageSize,
+            sort: { created: -1 },
+          },
         },
       ])
       .populate([
@@ -113,8 +119,10 @@ module.exports = class UserService {
           select: "_id email firstName lastName",
         },
       ])
+
       .select("userCreated instagramUrl active createdAt");
     if (!botRecordAndReplies) throw new ServiceError("bot doesn't exist");
+    //if no more, returs error
 
     return botRecordAndReplies;
   }

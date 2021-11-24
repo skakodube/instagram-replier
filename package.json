@@ -1,7 +1,7 @@
 {
   "name": "instagram-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "Link to the api\r https://instagram-replier.herokuapp.com/status",
   "main": "app.js",
   "scripts": {
     "start": "NODE_ENV=production node app",
@@ -35,5 +35,14 @@
     "winston": "^3.3.3",
     "winston-color": "^1.0.0",
     "winston-mongodb": "^5.0.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skakodube/instagram-replier.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/skakodube/instagram-replier/issues"
+  },
+  "homepage": "https://github.com/skakodube/instagram-replier#readme"
 }

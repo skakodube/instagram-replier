@@ -65,6 +65,8 @@ router.post(
     celebrate({
       body: {
         botId: Joi.objectId().required(),
+        pageNum: Joi.number().min(1).required(),
+        pageSize: Joi.number().min(1).required(),
       },
     }),
     auth,
@@ -72,7 +74,12 @@ router.post(
   async (req, res) => {
     const botService = new BotService();
 
-    const botAndReplies = await botService.getRepliesByBot(req.user, botId);
+    const botAndReplies = await botService.getRepliesByBot(
+      req.user,
+      req.body.botId,
+      req.body.pageNum,
+      req.body.pageSize
+    );
 
     res.send({ bot: botAndReplies });
   }
