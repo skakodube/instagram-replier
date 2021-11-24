@@ -42,7 +42,7 @@ router.put(
 );
 
 //=========================AccountVerification=========================//
-
+//NEW EMAIL IF WASN'T ACTIVATED AT REGISTERING
 router.post(
   "/send-verify-email",
   [
@@ -62,6 +62,7 @@ router.post(
   }
 );
 
+//ACTUALLY ACTIVATE
 router.post(
   "/activate-account",
   [
