@@ -1,7 +1,14 @@
 # instagram-replier
 
-Link to the api
-https://instagram-replier.herokuapp.com/status
+## Project setup
+`npm i`
 
-Api documentation
-https://documenter.getpostman.com/view/10805202/TWDdhsua
+## Run developer mode
+`npm run dev`
+
+## Run production mode
+`npm run start`
+
+## Links
+- Link to the API [Heroku](https://instagram-replier.herokuapp.com/status)
+- API documentation [Postman](https://documenter.getpostman.com/view/10805202/TWDdhsua)
