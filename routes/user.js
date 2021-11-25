@@ -124,8 +124,8 @@ router.post(
 
 //=========================ChangeEmail=========================//
 
-router.post(
-  "/send-change-notice-emails",
+router.put(
+  "/change-email",
   [
     celebrate({
       body: {
@@ -144,33 +144,37 @@ router.post(
     auth,
   ],
   async (req, res) => {
-    const emailService = new EmailService();
-    await emailService.sendChangeAndNoticeEmails(
-      req.user,
-      req.body.password,
-      req.body.newEmail
-    );
-    res.send("OK");
-  }
-);
-
-router.post(
-  "/change-email",
-  [
-    celebrate({
-      body: {
-        token: Joi.string().required(),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
     const userService = new UserService();
+    const userRecord = await userService.changeEmail(
+      req.user,
+      req.body.newEmail,
+      req.body.password
+    );
 
-    const user = await userService.changeEmailByToken(req.user, req.body.token);
+    res.header("x-auth-token", jwt.generateJWT(userRecord)).send("OK");
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user: user });
+    const emailService = new EmailService();
+    await emailService.sendChangeNoticeEmail(userRecord);
   }
 );
+
+// router.post(
+//   "/change-email",
+//   [
+//     celebrate({
+//       body: {
+//         token: Joi.string().required(),
+//       },
+//     }),
+//     auth,
+//   ],
+//   async (req, res) => {
+//     const userService = new UserService();
+
+//     const user = await userService.changeEmailByToken(req.user, req.body.token);
+
+//     res.header("x-auth-token", jwt.generateJWT(user)).send({ user: user });
+//   }
+// );
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 module.exports.generateJWT = function (user) {
+  //some more parameters?
   const payload = {
     id: user._id,
     email: user.email,

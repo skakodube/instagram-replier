@@ -3,11 +3,10 @@ const UserModel = require("../models/user");
 const ServiceError = require("../errors/serviceError");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const emailFrom = "instagram.replier@gmail.com";
-const verificationTemplate = "d-a4049454ef304608b860316272e372a5";
-const resetPasswordTemplate = "d-8c338d1c57514441924f40efe53138f5";
-const changeEmailTemplate = "d-c4ee6501a9f646a8ab40f566b38f1f81";
-const changeEmailNoticeTemplate = "d-3bf1a7ecc66648d4bf4643dc0ee1c60f";
+const emailFrom = "instagram.repliers@gmail.com";
+const verificationTemplate = "d-07c92790d29b4f82a22ef1b711c20190";
+const resetPasswordTemplate = "d-c8e41e53a34c4c7e90baca21f2014c0d";
+const changeEmailNoticeTemplate = "d-09c1910ee1944f4b8a2ea699cd43ddd6";
 
 module.exports = class EmailService {
   async sendVerificationEmail(user, confirmLink) {
@@ -25,7 +24,7 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
-        link:
+        Weblink:
           //confirmLink +
           "https://instagram.replier.com/account/confirm/" +
           userRecord.resetToken,
@@ -33,7 +32,7 @@ module.exports = class EmailService {
       template_id: verificationTemplate,
     };
 
-    await sgMail.send(msg).catch(() => {
+    const res = await sgMail.send(msg).catch(() => {
       throw new ServiceError("couldn't send an email");
     });
   }
@@ -53,7 +52,7 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
-        link:
+        Weblink:
           //resetLink +
           "https://instagram.replier.com/account/reset/" +
           userRecord.resetToken,
@@ -66,46 +65,12 @@ module.exports = class EmailService {
     });
   }
 
-  async sendChangeAndNoticeEmails(user, password, newEmail) {
-    let userRecord = await UserModel.findOne({
-      email: user.email,
-    });
-    if (!userRecord) throw new ServiceError("invalid email or password");
-
-    let userRecordTemp = await UserModel.findOne({
-      email: newEmail,
-    });
-    if (userRecordTemp) throw new ServiceError("email is already registered");
-
-    const validPassword = await userRecord.comparePassword(password);
-    if (!validPassword) throw new ServiceError("invalid email or password");
-
-    userRecord.generateReset();
-    userRecord.tempEmail = newEmail;
-    await userRecord.save();
-
+  async sendChangeNoticeEmail(user) {
     let msg = {
-      to: userRecord.tempEmail,
+      to: user.oldEmail,
       from: emailFrom,
       dynamic_template_data: {
-        newEmail: userRecord.tempEmail,
-        link:
-          //resetLink +
-          "https://instagram.replier.com/account/email/" +
-          userRecord.resetToken,
-      },
-      template_id: changeEmailTemplate,
-    };
-
-    await sgMail.send(msg).catch(() => {
-      throw new ServiceError("couldn't send an email");
-    });
-
-    msg = {
-      to: userRecord.email,
-      from: emailFrom,
-      dynamic_template_data: {
-        newEmail: userRecord.tempEmail,
+        newEmail: user.email,
       },
       template_id: changeEmailNoticeTemplate,
     };

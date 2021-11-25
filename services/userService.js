@@ -140,21 +140,49 @@ module.exports = class UserService {
     return;
   }
 
-  async changeEmailByToken(user, token) {
-    const userRecord = await UserModel.findOne({
-      email: user.email,
-      resetToken: token,
-      resetExpires: { $gt: Date.now() },
-    });
-    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+  async changeEmail(user, newEmail, password) {
+    //TODO: refactor error
+    //could do in one method with OR operator
+    if (user.email == newEmail)
+      throw new ServiceError("invalid email or password");
 
-    userRecord.email = userRecord.tempEmail;
-    userRecord.tempEmail = undefined;
-    userRecord.resetToken = undefined;
-    userRecord.resetExpires = undefined;
+    let userRecord = await UserModel.findOne({
+      email: newEmail,
+    });
+    if (userRecord) throw new ServiceError("email is already registered");
+
+    userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new ServiceError("invalid email or password");
+
+    const validPassword = await userRecord.comparePassword(password);
+    if (!validPassword) throw new ServiceError("invalid email or password");
+
+    const oldEmail = user.email;
+    userRecord.email = newEmail;
 
     await userRecord.save();
 
+    userRecord.oldEmail = oldEmail;
     return userRecord;
   }
+
+  // async changeEmailByToken(user, token) {
+  //   const userRecord = await UserModel.findOne({
+  //     email: user.email,
+  //     resetToken: token,
+  //     resetExpires: { $gt: Date.now() },
+  //   });
+  //   if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+
+  //   userRecord.email = userRecord.tempEmail;
+  //   userRecord.tempEmail = undefined;
+  //   userRecord.resetToken = undefined;
+  //   userRecord.resetExpires = undefined;
+
+  //   await userRecord.save();
+
+  //   return userRecord;
+  // }
 };
