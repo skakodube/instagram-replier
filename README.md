@@ -7,10 +7,10 @@ npm i
 ```
 
 ## Run developer mode
-`npm run dev`
+```npm run dev```
 
 ## Run production mode
-`npm run start`
+```npm run start```
 
 
 ## Links
