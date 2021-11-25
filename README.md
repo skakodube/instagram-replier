@@ -2,7 +2,9 @@
 
 
 ## Project setup
-`npm i`
+```
+npm i
+```
 
 ## Run developer mode
 `npm run dev`
