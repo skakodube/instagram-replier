@@ -1,4 +1,5 @@
-# instagram-replier
+# Instagram Replier API
+
 
 ## Project setup
 `npm i`
@@ -8,6 +9,7 @@
 
 ## Run production mode
 `npm run start`
+
 
 ## Links
 - Link to the API [Heroku](https://instagram-replier.herokuapp.com/status)
