@@ -1,4 +1,4 @@
-# Instagram Replier API
+# Instagram replier backend
 
 
 ## Project setup
