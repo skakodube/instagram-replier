@@ -34,10 +34,10 @@ router.post(
     const userService = new UserService();
     const user = await userService.signup(req.body);
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
-
     const emailService = new EmailService();
     await emailService.sendVerificationEmail(user, req.body.verificationLink);
+
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
 

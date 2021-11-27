@@ -8,13 +8,13 @@ const EmailService = require("../services/emailService");
 const auth = require("../middleware/auth");
 const jwt = require("../helpers/jwt");
 const _ = require("lodash");
-
+//TODO: REMOVE AWAIT ON EMAILING
 router.get("/me", [auth], async (req, res) => {
   const userService = new UserService();
 
   const userRecord = await userService.getMe(req.user);
 
-  res.send(userRecord);
+  res.header("x-auth-token", jwt.generateJWT(userRecord)).send(userRecord);
 });
 
 router.put(
@@ -78,13 +78,13 @@ router.post(
 
     const user = await userService.activateAccount(req.user, req.body.token);
 
-    res.send({ user });
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
 
 //=========================ResetPassword=========================//
 
-router.post(
+router.put(
   "/reset-password",
   [
     celebrate({
@@ -145,36 +145,17 @@ router.put(
   ],
   async (req, res) => {
     const userService = new UserService();
-    const userRecord = await userService.changeEmail(
+    const data = await userService.changeEmail(
       req.user,
       req.body.newEmail,
       req.body.password
     );
 
-    res.header("x-auth-token", jwt.generateJWT(userRecord)).send("OK");
-
     const emailService = new EmailService();
-    await emailService.sendChangeNoticeEmail(userRecord);
+    await emailService.sendChangeNoticeEmail(data.userRecord, data.oldEmail);
+
+    res.header("x-auth-token", jwt.generateJWT(data.userRecord)).send("OK");
   }
 );
-
-// router.post(
-//   "/change-email",
-//   [
-//     celebrate({
-//       body: {
-//         token: Joi.string().required(),
-//       },
-//     }),
-//     auth,
-//   ],
-//   async (req, res) => {
-//     const userService = new UserService();
-
-//     const user = await userService.changeEmailByToken(req.user, req.body.token);
-
-//     res.header("x-auth-token", jwt.generateJWT(user)).send({ user: user });
-//   }
-// );
 
 module.exports = router;

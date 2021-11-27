@@ -1,6 +1,7 @@
 const sgMail = require("@sendgrid/mail");
 const UserModel = require("../models/user");
-const ServiceError = require("../errors/serviceError");
+const EmailError = require("../errors/emailError");
+const UserNotFoundError = require("../errors/userNotFound");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const emailFrom = "instagram.repliers@gmail.com";
@@ -15,7 +16,7 @@ module.exports = class EmailService {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord) throw new UserNotFoundError();
 
     userRecord.generateReset();
     await userRecord.save();
@@ -32,8 +33,8 @@ module.exports = class EmailService {
       template_id: verificationTemplate,
     };
 
-    const res = await sgMail.send(msg).catch(() => {
-      throw new ServiceError("couldn't send an email");
+    await sgMail.send(msg).catch((error) => {
+      throw new EmailError(error);
     });
   }
 
@@ -60,14 +61,14 @@ module.exports = class EmailService {
       template_id: resetPasswordTemplate,
     };
 
-    await sgMail.send(msg).catch(() => {
-      throw new ServiceError("couldn't send an email");
+    await sgMail.send(msg).catch((error) => {
+      throw new EmailError(error);
     });
   }
 
-  async sendChangeNoticeEmail(user) {
+  async sendChangeNoticeEmail(user, oldEmail) {
     let msg = {
-      to: user.oldEmail,
+      to: oldEmail,
       from: emailFrom,
       dynamic_template_data: {
         newEmail: user.email,
@@ -75,8 +76,8 @@ module.exports = class EmailService {
       template_id: changeEmailNoticeTemplate,
     };
 
-    await sgMail.send(msg).catch(() => {
-      throw new ServiceError("couldn't send an email");
+    await sgMail.send(msg).catch((error) => {
+      throw new EmailError(error);
     });
   }
 };

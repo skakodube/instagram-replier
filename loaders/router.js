@@ -1,5 +1,7 @@
 const express = require("express");
-const error = require("../middleware/error");
+const errorLogger = require("../middleware/errorLogger");
+const errorResponder = require("../middleware/errorResponder");
+const failSafeHandler = require("../middleware/failSafeHandler");
 const cors = require("cors");
 const { errors: joiError } = require("celebrate");
 const auth = require("../routes/auth");
@@ -7,6 +9,7 @@ const user = require("../routes/user");
 const bot = require("../routes/bot");
 
 module.exports = function (app) {
+  app.use(cors());
   app.get("/status", (req, res) => {
     res.status(200).end();
   });
@@ -24,5 +27,7 @@ module.exports = function (app) {
   app.use("/user", user);
   app.use("/bot", bot);
   app.use(joiError());
-  app.use(error);
+  app.use(errorLogger);
+  app.use(errorResponder);
+  app.use(failSafeHandler);
 };

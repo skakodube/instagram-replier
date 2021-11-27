@@ -1,13 +1,16 @@
 const UserModel = require("../models/user");
-const ServiceError = require("../errors/serviceError");
 const _ = require("lodash");
+const UserAlreadyExistError = require("../errors/userAlreadyExist");
+const UserNotFoundError = require("../errors/userNotFound");
+const InvalidTokenError = require("../errors/invalidToken");
 
+//TODO: check if user is verified
 module.exports = class UserService {
   async signup(user) {
     let userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (userRecord) throw new ServiceError("user already registered");
+    if (userRecord) throw new UserAlreadyExistError();
 
     userRecord = new UserModel(
       _.pick(user, ["firstName", "lastName", "email", "password", "isAdmin"])
@@ -30,10 +33,11 @@ module.exports = class UserService {
     let userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (!userRecord) throw new ServiceError("invalid email or password");
+    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
 
     const validPassword = await userRecord.comparePassword(user.password);
-    if (!validPassword) throw new ServiceError("invalid email or password");
+    if (!validPassword)
+      throw new UserNotFoundError("Invalid Email Or Password.");
 
     return _.pick(userRecord, [
       "_id",
@@ -56,7 +60,7 @@ module.exports = class UserService {
       },
       { new: true }
     );
-    if (!userRecord) throw new ServiceError("invalid email or password");
+    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
 
     return _.pick(userRecord, [
       "_id",
@@ -72,7 +76,7 @@ module.exports = class UserService {
     let userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (!userRecord) throw new ServiceError("user doesn't exist");
+    if (!userRecord) throw new UserNotFoundError();
 
     return _.pick(userRecord, [
       "_id",
@@ -90,7 +94,7 @@ module.exports = class UserService {
       resetToken: token,
       resetExpires: { $gt: Date.now() },
     });
-    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+    if (!userRecord) throw new InvalidTokenError();
 
     userRecord.resetToken = undefined;
     userRecord.resetExpires = undefined;
@@ -113,7 +117,7 @@ module.exports = class UserService {
       resetToken: token,
       resetExpires: { $gt: Date.now() },
     });
-    if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+    if (!userRecord) throw new InvalidTokenError();
 
     userRecord.password = password;
     userRecord.resetToken = undefined;
@@ -128,10 +132,11 @@ module.exports = class UserService {
     let userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (!userRecord) throw new ServiceError("invalid email or password");
+    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
 
     const validPassword = await userRecord.comparePassword(oldPassword);
-    if (!validPassword) throw new ServiceError("invalid email or password");
+    if (!validPassword)
+      throw new UserNotFoundError("Invalid Email Or Password.");
 
     userRecord.password = newPassword;
 
@@ -141,31 +146,40 @@ module.exports = class UserService {
   }
 
   async changeEmail(user, newEmail, password) {
-    //TODO: refactor error
     //could do in one method with OR operator
     if (user.email == newEmail)
-      throw new ServiceError("invalid email or password");
+      throw new UserNotFoundError("Invalid Email Or Password.");
 
     let userRecord = await UserModel.findOne({
       email: newEmail,
     });
-    if (userRecord) throw new ServiceError("email is already registered");
+    if (userRecord)
+      throw new UserAlreadyExistError("User With This Email Already Exist.");
 
     userRecord = await UserModel.findOne({
       email: user.email,
     });
-    if (!userRecord) throw new ServiceError("invalid email or password");
+    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
 
     const validPassword = await userRecord.comparePassword(password);
-    if (!validPassword) throw new ServiceError("invalid email or password");
+    if (!validPassword)
+      throw new UserNotFoundError("Invalid Email Or Password.");
 
     const oldEmail = user.email;
     userRecord.email = newEmail;
 
     await userRecord.save();
 
-    userRecord.oldEmail = oldEmail;
-    return userRecord;
+    userRecord = _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
+
+    return { userRecord, oldEmail };
   }
 
   // async changeEmailByToken(user, token) {
@@ -174,7 +188,7 @@ module.exports = class UserService {
   //     resetToken: token,
   //     resetExpires: { $gt: Date.now() },
   //   });
-  //   if (!userRecord) throw new ServiceError("Token is invalid or has expired");
+  //   if (!userRecord) throw new ApplicationError("Token is invalid or has expired");
 
   //   userRecord.email = userRecord.tempEmail;
   //   userRecord.tempEmail = undefined;

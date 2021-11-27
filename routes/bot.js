@@ -8,6 +8,7 @@ const auth = require("../middleware/auth");
 //TODO:
 //add users searcher by email for invites
 //SEND DATA OR OK?
+//VERIFICATION MUST BE MIDDLEWARE
 
 router.get("/", [auth], async (req, res) => {
   const botService = new BotService();
@@ -165,7 +166,7 @@ router.put(
 
 //=========================Moderators=========================//
 
-router.post(
+router.put(
   "/invite-moderator",
   [
     celebrate({
@@ -189,12 +190,12 @@ router.post(
   }
 );
 
-router.post(
+router.put(
   "/remove-moderator",
   [
     celebrate({
       body: {
-        userToInviteId: Joi.objectId().required(),
+        userToRemoveId: Joi.objectId().required(),
         botId: Joi.objectId().required(),
       },
     }),
@@ -205,7 +206,7 @@ router.post(
 
     const bot = await botService.removeModerator(
       req.user,
-      req.body.userToInviteId,
+      req.body.userToRemoveId,
       req.body.botId
     );
 
