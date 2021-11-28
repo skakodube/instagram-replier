@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const UserModel = require("./user");
-
+//
 const BotSchema = new mongoose.Schema(
   {
     userCreated: {
