@@ -112,32 +112,8 @@ router.post(
   }
 );
 
-router.delete(
+router.patch(
   "/reply",
-  [
-    celebrate({
-      body: {
-        botId: Joi.objectId().required(),
-        replyId: Joi.objectId().required(),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
-    const botService = new BotService();
-
-    const reply = await botService.deleteReply(
-      req.user,
-      req.body.botId,
-      req.body.replyId
-    );
-
-    res.send({ reply });
-  }
-);
-
-router.put(
-  "/",
   [
     celebrate({
       body: {
@@ -158,6 +134,30 @@ router.put(
       req.body.replyId,
       req.body.keywords,
       req.body.reply
+    );
+
+    res.send({ reply });
+  }
+);
+
+router.delete(
+  "/reply",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+        replyId: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const botService = new BotService();
+
+    const reply = await botService.deleteReply(
+      req.user,
+      req.body.botId,
+      req.body.replyId
     );
 
     res.send({ reply });

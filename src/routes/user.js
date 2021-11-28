@@ -10,13 +10,13 @@ const jwt = require("../helpers/jwt");
 const _ = require("lodash");
 //TODO: REMOVE AWAIT ON EMAILING
 
-router.get("/me", [auth], async (req, res) => {
-  const userService = new UserService();
+// router.get("/me", [auth], async (req, res) => {
+//   const userService = new UserService();
 
-  const userRecord = await userService.getMe(req.user);
+//   const userRecord = await userService.getMe(req.user);
 
-  res.header("x-auth-token", jwt.generateJWT(userRecord)).send(userRecord);
-});
+//   res.header("x-auth-token", jwt.generateJWT(userRecord)).send(userRecord);
+// });
 
 //refactor to change single chosen parameter?
 router.put(
@@ -42,49 +42,6 @@ router.put(
     res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
-
-//=========================AccountVerification=========================//
-//NEW EMAIL IF WASN'T ACTIVATED AT REGISTERING
-router.get(
-  "/send-verify-email",
-  [
-    celebrate({
-      body: {
-        link: Joi.string().required().min(1).max(255),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
-    const emailService = new EmailService();
-
-    await emailService.sendVerificationEmail(req.user, req.body.link);
-
-    res.send("OK");
-  }
-);
-
-//ACTUALLY ACTIVATE
-router.patch(
-  "/activate-account",
-  [
-    celebrate({
-      body: {
-        token: Joi.string().required(),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
-    const userService = new UserService();
-
-    const user = await userService.activateAccount(req.user, req.body.token);
-
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
-  }
-);
-
-//=========================ResetPassword=========================//
 
 router.patch(
   "/reset-password",
@@ -124,8 +81,6 @@ router.patch(
   }
 );
 
-//=========================ChangeEmail=========================//
-
 router.patch(
   "/change-email",
   [
@@ -160,6 +115,45 @@ router.patch(
   }
 );
 
+//=========================AccountVerification=========================//
+router.get(
+  "/send-activate-email",
+  [
+    celebrate({
+      body: {
+        link: Joi.string().required().min(1).max(255),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const emailService = new EmailService();
+
+    await emailService.sendVerificationEmail(req.user, req.body.link);
+
+    res.send("OK");
+  }
+);
+
+router.patch(
+  "/activate-account",
+  [
+    celebrate({
+      body: {
+        token: Joi.string().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    const userService = new UserService();
+
+    const user = await userService.activateAccount(req.user, req.body.token);
+
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+  }
+);
+
 //=========================RecoverPassword=========================//
 
 router.get(
@@ -181,7 +175,7 @@ router.get(
 );
 
 router.patch(
-  "/reset-password",
+  "/recover-password",
   [
     celebrate({
       body: {

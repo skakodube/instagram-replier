@@ -26,7 +26,7 @@ router.post(
 );
 
 router.post(
-  "/register",
+  "/signup",
   [
     celebrate({
       body: {

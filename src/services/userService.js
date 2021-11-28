@@ -49,6 +49,22 @@ module.exports = class UserService {
     ]);
   }
 
+  // async getMe(user) {
+  //   let userRecord = await UserModel.findOne({
+  //     email: user.email,
+  //   });
+  //   if (!userRecord) throw new UserNotFoundError();
+
+  //   return _.pick(userRecord, [
+  //     "_id",
+  //     "firstName",
+  //     "lastName",
+  //     "email",
+  //     "verified",
+  //     "isAdmin",
+  //   ]);
+  // }
+
   async edit(user, newFirstName, newLastName) {
     let userRecord = await UserModel.findOneAndUpdate(
       {
@@ -72,28 +88,14 @@ module.exports = class UserService {
     ]);
   }
 
-  async getMe(user) {
-    let userRecord = await UserModel.findOne({
-      email: user.email,
-    });
-    if (!userRecord) throw new UserNotFoundError();
-
-    return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "verified",
-      "isAdmin",
-    ]);
-  }
-
   async activateAccount(user, token) {
     const userRecord = await UserModel.findOne({
       email: user.email,
       resetToken: token,
       resetExpires: { $gt: Date.now() },
     });
+    console.log(userRecord);
+
     if (!userRecord) throw new InvalidTokenError();
 
     userRecord.resetToken = undefined;
