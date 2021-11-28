@@ -19,7 +19,7 @@ router.get("/", [auth], async (req, res) => {
 });
 
 router.post(
-  "/create",
+  "/",
   [
     celebrate({
       body: {
@@ -38,7 +38,7 @@ router.post(
 );
 
 router.delete(
-  "/delete",
+  "/",
   [
     celebrate({
       body: {
@@ -58,10 +58,10 @@ router.delete(
 
 //=========================Replies=========================//
 
-router.post(
+router.get(
   //TODO:
   //get or post?
-  "/replies",
+  "/reply",
   [
     celebrate({
       body: {
@@ -87,7 +87,7 @@ router.post(
 );
 
 router.post(
-  "/add-reply",
+  "/reply",
   [
     celebrate({
       body: {
@@ -113,7 +113,7 @@ router.post(
 );
 
 router.delete(
-  "/delete-reply",
+  "/reply",
   [
     celebrate({
       body: {
@@ -137,7 +137,7 @@ router.delete(
 );
 
 router.put(
-  "/edit-reply",
+  "/",
   [
     celebrate({
       body: {
@@ -166,7 +166,7 @@ router.put(
 
 //=========================Moderators=========================//
 
-router.put(
+router.patch(
   "/invite-moderator",
   [
     celebrate({
@@ -190,7 +190,7 @@ router.put(
   }
 );
 
-router.put(
+router.patch(
   "/remove-moderator",
   [
     celebrate({

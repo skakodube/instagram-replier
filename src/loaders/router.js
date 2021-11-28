@@ -9,7 +9,13 @@ const user = require("../routes/user");
 const bot = require("../routes/bot");
 
 module.exports = function (app) {
+  app.use(express.json());
   app.use(cors());
+  app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Headers", "*");
+    next();
+  });
+
   app.get("/status", (req, res) => {
     res.status(200).end();
   });
@@ -17,12 +23,6 @@ module.exports = function (app) {
     res.status(200).end();
   });
 
-  // app.use(cors);
-  app.use(express.json());
-  app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Headers", "*");
-    next();
-  });
   app.use("/auth", auth);
   app.use("/user", user);
   app.use("/bot", bot);

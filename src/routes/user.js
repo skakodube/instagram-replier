@@ -9,6 +9,7 @@ const auth = require("../middleware/auth");
 const jwt = require("../helpers/jwt");
 const _ = require("lodash");
 //TODO: REMOVE AWAIT ON EMAILING
+
 router.get("/me", [auth], async (req, res) => {
   const userService = new UserService();
 
@@ -17,8 +18,9 @@ router.get("/me", [auth], async (req, res) => {
   res.header("x-auth-token", jwt.generateJWT(userRecord)).send(userRecord);
 });
 
+//refactor to change single chosen parameter?
 router.put(
-  "/edit",
+  "/",
   [
     celebrate({
       body: {
@@ -43,7 +45,7 @@ router.put(
 
 //=========================AccountVerification=========================//
 //NEW EMAIL IF WASN'T ACTIVATED AT REGISTERING
-router.post(
+router.get(
   "/send-verify-email",
   [
     celebrate({
@@ -63,7 +65,7 @@ router.post(
 );
 
 //ACTUALLY ACTIVATE
-router.post(
+router.patch(
   "/activate-account",
   [
     celebrate({
@@ -84,7 +86,7 @@ router.post(
 
 //=========================ResetPassword=========================//
 
-router.put(
+router.patch(
   "/reset-password",
   [
     celebrate({
@@ -124,7 +126,7 @@ router.put(
 
 //=========================ChangeEmail=========================//
 
-router.put(
+router.patch(
   "/change-email",
   [
     celebrate({
@@ -155,6 +157,56 @@ router.put(
     await emailService.sendChangeNoticeEmail(data.userRecord, data.oldEmail);
 
     res.header("x-auth-token", jwt.generateJWT(data.userRecord)).send("OK");
+  }
+);
+
+//=========================RecoverPassword=========================//
+
+router.get(
+  "/send-recover-email",
+  [
+    celebrate({
+      body: {
+        email: Joi.string().required().min(5).max(255).email(),
+        link: Joi.string().required().min(1).max(255),
+      },
+    }),
+  ],
+  async (req, res) => {
+    const emailService = new EmailService();
+    await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
+
+    res.send("OK");
+  }
+);
+
+router.patch(
+  "/reset-password",
+  [
+    celebrate({
+      body: {
+        token: Joi.string().required(),
+        password: passwordComplexity({
+          min: 5,
+          max: 255,
+          lowerCase: 0,
+          upperCase: 0,
+          numeric: 0,
+          symbol: 0,
+          requirementCount: 2,
+        }).required(),
+      },
+    }),
+  ],
+  async (req, res) => {
+    const userService = new UserService();
+
+    await userService.resetPasswordByEmailtoken(
+      req.body.token,
+      req.body.password
+    );
+
+    res.send("OK");
   }
 );
 

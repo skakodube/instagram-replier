@@ -4,10 +4,10 @@ const EmailError = require("../errors/emailError");
 const UserNotFoundError = require("../errors/userNotFound");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const emailFrom = "instagram.repliers@gmail.com";
 const verificationTemplate = "d-07c92790d29b4f82a22ef1b711c20190";
 const resetPasswordTemplate = "d-c8e41e53a34c4c7e90baca21f2014c0d";
 const changeEmailNoticeTemplate = "d-09c1910ee1944f4b8a2ea699cd43ddd6";
+const emailFrom = process.env.SENDGRID_SENDER;
 
 module.exports = class EmailService {
   async sendVerificationEmail(user, confirmLink) {
