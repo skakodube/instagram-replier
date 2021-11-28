@@ -62,7 +62,10 @@ router.post(
       "Sending verification email : " + JSON.stringify(req.body.email)
     );
     const emailService = new EmailService();
-    await emailService.sendVerificationEmail(user, req.body.verificationLink);
+    await emailService.sendVerificationEmail(
+      user.email,
+      req.body.verificationLink
+    );
 
     res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
