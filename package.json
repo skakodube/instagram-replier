@@ -44,5 +44,8 @@
   "bugs": {
     "url": "https://github.com/skakodube/instagram-replier/issues"
   },
-  "homepage": "https://github.com/skakodube/instagram-replier#readme"
+  "homepage": "https://github.com/skakodube/instagram-replier#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
 }
