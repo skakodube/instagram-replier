@@ -10,11 +10,11 @@ const changeEmailNoticeTemplate = "d-09c1910ee1944f4b8a2ea699cd43ddd6";
 const emailFrom = process.env.SENDGRID_SENDER;
 
 module.exports = class EmailService {
-  async sendVerificationEmail(user, confirmLink) {
+  async sendVerificationEmail(email, confirmLink) {
     //TODO:
     //Send OK return or send email to unregistered?
     const userRecord = await UserModel.findOne({
-      email: user.email,
+      email,
     });
     if (!userRecord) throw new UserNotFoundError();
 

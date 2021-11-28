@@ -8,6 +8,8 @@ const EmailService = require("../services/emailService");
 const auth = require("../middleware/auth");
 const jwt = require("../helpers/jwt");
 const _ = require("lodash");
+const logger = require("../loaders/logging");
+
 //TODO: REMOVE AWAIT ON EMAILING
 
 // router.get("/me", [auth], async (req, res) => {
@@ -32,6 +34,9 @@ router.put(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Edit-User endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
 
     user = await userService.edit(
@@ -72,6 +77,9 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Reset-Password endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
     await userService.resetPasswordByPassword(
       req.user,
@@ -102,17 +110,20 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Change-Email endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
-    const data = await userService.changeEmail(
+    const { userRecord, oldEmail } = await userService.changeEmail(
       req.user,
       req.body.newEmail,
       req.body.password
     );
-
+    logger.silly("Sending notice email to : " + JSON.stringify(oldEmail));
     const emailService = new EmailService();
-    await emailService.sendChangeNoticeEmail(data.userRecord, data.oldEmail);
+    await emailService.sendChangeNoticeEmail(userRecord, oldEmail);
 
-    res.header("x-auth-token", jwt.generateJWT(data.userRecord)).send("OK");
+    res.header("x-auth-token", jwt.generateJWT(userRecord)).send("OK");
   }
 );
 
@@ -128,9 +139,15 @@ router.get(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Send-Activate-Email endpoint with body: " +
+        JSON.stringify(req.body)
+    );
     const emailService = new EmailService();
-
-    await emailService.sendVerificationEmail(req.user, req.body.link);
+    logger.silly(
+      "Sending verification email to: " + JSON.stringify(req.user.email)
+    );
+    await emailService.sendVerificationEmail(req.user.email, req.body.link);
 
     res.send("OK");
   }
@@ -147,6 +164,9 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Activate-Account endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
 
     const user = await userService.activateAccount(req.user, req.body.token);
@@ -168,6 +188,13 @@ router.get(
     }),
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Send-Recover-Email endpoint with body: " +
+        JSON.stringify(req.body)
+    );
+    logger.silly(
+      "Sending recover passwor email to: " + JSON.stringify(req.body.email)
+    );
     const emailService = new EmailService();
     await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
 
@@ -194,6 +221,9 @@ router.patch(
     }),
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Recover-Password endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
 
     await userService.resetPasswordByEmailtoken(

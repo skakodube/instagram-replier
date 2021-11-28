@@ -4,6 +4,7 @@ const { celebrate, Joi } = require("celebrate");
 Joi.objectId = require("joi-objectid")(Joi);
 const BotService = require("../services/botService");
 const auth = require("../middleware/auth");
+const logger = require("../loaders/logging");
 
 //TODO:
 //add users searcher by email for invites
@@ -11,6 +12,7 @@ const auth = require("../middleware/auth");
 //VERIFICATION MUST BE MIDDLEWARE
 
 router.get("/", [auth], async (req, res) => {
+  logger.debug("Calling Get-Bots endpoint");
   const botService = new BotService();
 
   const userAndBots = await botService.getBots(req.user);
@@ -29,6 +31,9 @@ router.post(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Create-Bot endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const bot = await botService.createBot(req.user, req.body.instagramUrl);
@@ -48,6 +53,9 @@ router.delete(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Delete-Bot endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const bot = await botService.deleteBot(req.user, req.body.botId);
@@ -73,6 +81,9 @@ router.get(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Get-Replies endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const botAndReplies = await botService.getRepliesByBot(
@@ -99,6 +110,9 @@ router.post(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Add-Reply endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const reply = await botService.addReply(
@@ -126,6 +140,9 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Edit-Reply endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const reply = await botService.editReply(
@@ -152,6 +169,9 @@ router.delete(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Delete-Reply endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const reply = await botService.deleteReply(
@@ -178,6 +198,9 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Invite-Moderator endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const bot = await botService.inviteModerator(
@@ -202,6 +225,9 @@ router.patch(
     auth,
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Remove-Moderator endpoint with body: " + JSON.stringify(req.body)
+    );
     const botService = new BotService();
 
     const bot = await botService.removeModerator(

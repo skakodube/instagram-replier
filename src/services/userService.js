@@ -4,8 +4,27 @@ const UserAlreadyExistError = require("../errors/userAlreadyExist");
 const UserNotFoundError = require("../errors/userNotFound");
 const InvalidTokenError = require("../errors/invalidToken");
 
-//TODO: check if user is verified
 module.exports = class UserService {
+  async login(user) {
+    let userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
+
+    const validPassword = await userRecord.comparePassword(user.password);
+    if (!validPassword)
+      throw new UserNotFoundError("Invalid Email Or Password.");
+
+    return _.pick(userRecord, [
+      "_id",
+      "firstName",
+      "lastName",
+      "email",
+      "verified",
+      "isAdmin",
+    ]);
+  }
+
   async signup(user) {
     let userRecord = await UserModel.findOne({
       email: user.email,
@@ -18,26 +37,6 @@ module.exports = class UserService {
     userRecord.password = user.password;
 
     await userRecord.save();
-
-    return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "verified",
-      "isAdmin",
-    ]);
-  }
-
-  async login(user) {
-    let userRecord = await UserModel.findOne({
-      email: user.email,
-    });
-    if (!userRecord) throw new UserNotFoundError("Invalid Email Or Password.");
-
-    const validPassword = await userRecord.comparePassword(user.password);
-    if (!validPassword)
-      throw new UserNotFoundError("Invalid Email Or Password.");
 
     return _.pick(userRecord, [
       "_id",

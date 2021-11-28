@@ -23,6 +23,13 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.File({
       filename: "combined.log",
+      level: "silly",
+      handleExceptions: true,
+      handleRejections: true,
+    }),
+    new winston.transports.File({
+      filename: "error.log",
+      level: "error",
       handleExceptions: true,
       handleRejections: true,
     }),
@@ -39,6 +46,7 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV !== "production") {
   logger.add(
     new winston.transports.Console({
+      level: "silly",
       format: winston.format.combine(
         winston.format.simple(),
         winston.format.timestamp({

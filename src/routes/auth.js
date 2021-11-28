@@ -6,6 +6,7 @@ const passwordComplexity = require("joi-password-complexity").default;
 const UserService = require("../services/userService");
 const EmailService = require("../services/emailService");
 const jwt = require("../helpers/jwt");
+const logger = require("../loaders/logging");
 
 router.post(
   "/login",
@@ -18,6 +19,9 @@ router.post(
     }),
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Log-in endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
     const user = await userService.login(req.body);
 
@@ -48,9 +52,15 @@ router.post(
     }),
   ],
   async (req, res) => {
+    logger.debug(
+      "Calling Log-in endpoint with body: " + JSON.stringify(req.body)
+    );
     const userService = new UserService();
     const user = await userService.signup(req.body);
 
+    logger.silly(
+      "Sending verification email : " + JSON.stringify(req.body.email)
+    );
     const emailService = new EmailService();
     await emailService.sendVerificationEmail(user, req.body.verificationLink);
 
