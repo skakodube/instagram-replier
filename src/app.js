@@ -7,11 +7,15 @@ require("./api/loaders/db")();
 require("./api/loaders/router")(app);
 require("./api/loaders/prod")(app);
 
-app.listen(
-  config.port || 5000,
-  logger.info(`
+try {
+  app.listen(
+    config.port || 5000,
+    logger.info(`
   #####################################
   🛡️  Server listening on port: ${config.port} 🛡️
   #####################################
 `)
-);
+  );
+} catch (err) {
+  console.log(err.stack);
+}

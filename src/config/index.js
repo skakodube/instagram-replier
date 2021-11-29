@@ -1,7 +1,8 @@
 const dotenv = require("dotenv");
 const fs = require("fs");
 
-if (fs.existsSync(".env.example")) {
+if (!fs.existsSync(".env")) {
+  fs.copyFile(".env.example", ".env.example", () => {});
   fs.renameSync(".env.example", ".env");
 }
 
