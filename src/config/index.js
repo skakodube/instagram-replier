@@ -1,4 +1,9 @@
 const dotenv = require("dotenv");
+const fs = require("fs");
+
+if (fs.existsSync(".env.example")) {
+  fs.renameSync(".env.example", ".env");
+}
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
@@ -8,7 +13,7 @@ if (envFound.error) {
 }
 
 module.exports = {
-  port: parseInt(process.env.PORT, 10) || 5000,
+  port: parseInt(process.env.PORT, 10),
 
   databaseURL: process.env.MONGODB_URI,
 
