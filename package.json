@@ -29,6 +29,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "mongoose": "^5.11.15",
+    "nodemon": "^2.0.15",
     "prettier": "^2.5.0",
     "winston": "^3.3.3",
     "winston-mongodb": "^5.0.5"
