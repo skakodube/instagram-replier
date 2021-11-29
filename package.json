@@ -2,9 +2,9 @@
   "name": "instagram-service",
   "version": "1.0.0",
   "description": "Link to the api\r https://instagram-replier.herokuapp.com/status",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "NODE_ENV=production node app",
+    "start": "nodemon app",
     "dev": "cross-env NODE_ENV=development nodemon app"
   },
   "engines": {

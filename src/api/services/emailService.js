@@ -2,12 +2,13 @@ const sgMail = require("@sendgrid/mail");
 const UserModel = require("../models/user");
 const EmailError = require("../errors/emailError");
 const UserNotFoundError = require("../errors/userNotFound");
+const config = require("../../config");
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(config.emails.apiKey);
 const verificationTemplate = "d-07c92790d29b4f82a22ef1b711c20190";
 const resetPasswordTemplate = "d-c8e41e53a34c4c7e90baca21f2014c0d";
 const changeEmailNoticeTemplate = "d-09c1910ee1944f4b8a2ea699cd43ddd6";
-const emailFrom = process.env.SENDGRID_SENDER;
+const emailFrom = config.emails.apiSender;
 
 module.exports = class EmailService {
   async sendVerificationEmail(email, confirmLink) {

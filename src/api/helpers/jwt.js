@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const config = require("../../config");
 
 module.exports.generateJWT = function (user) {
   //some more parameters?
@@ -9,7 +10,7 @@ module.exports.generateJWT = function (user) {
     lastName: user.lastName,
   };
 
-  return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, {
+  return jwt.sign(payload, config.jwtSecret, {
     expiresIn: "60 days",
   });
 };

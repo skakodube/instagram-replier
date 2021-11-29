@@ -32,7 +32,7 @@ module.exports = class UserService {
       .select("email firstName lastName verified isAdmin dateRegistered");
     if (!userRecordAndBots) throw new UserNotFoundError();
     if (!userRecordAndBots.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     return userRecordAndBots;
   }
@@ -43,12 +43,13 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     let newBotRecord = await BotModel.findOne({
       instagramUrl: instagramUrl,
     });
-    if (newBotRecord) throw new BotAlreadyExistError("Bot URL Already Exist.");
+    if (newBotRecord)
+      throw new BotAlreadyExistError("🔥 Bot URL Already Exist.");
 
     newBotRecord = new BotModel({
       userCreated: userRecord._id,
@@ -76,7 +77,7 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     let oldBotRecord = await BotModel.findOneAndDelete({
       _id: mongoose.Types.ObjectId(botToDeleteId),
@@ -103,7 +104,7 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecordAndReplies = await BotModel.findById({
       _id: mongoose.Types.ObjectId(botId),
@@ -141,7 +142,7 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     let botRecord = await BotModel.findOne({
       _id: botId,
@@ -154,7 +155,9 @@ module.exports = class UserService {
       answer: newAnswer,
     });
     if (replyRecord)
-      throw new ReplyAlreadyExistError("Reply With This Answer Already Exist.");
+      throw new ReplyAlreadyExistError(
+        "🔥 Reply With This Answer Already Exist."
+      );
 
     let newReply = new ReplyModel({
       botBelongs: botRecord._id,
@@ -183,7 +186,7 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({
       _id: mongoose.Types.ObjectId(botId),
@@ -212,7 +215,7 @@ module.exports = class UserService {
     });
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     let botRecord = await BotModel.findOne({
       _id: botId,
@@ -245,12 +248,12 @@ module.exports = class UserService {
     });
     if (!userOwnerRecord) throw new UserNotFoundError();
     if (!userOwnerRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const userToInviteRecord = await UserModel.findById(userToInviteId);
     if (!userToInviteRecord) throw new UserNotFoundError();
     if (!userToInviteRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({
       _id: botId,
@@ -258,7 +261,9 @@ module.exports = class UserService {
       userModerators: { $ne: userToInviteRecord._id },
     });
     if (!botRecord)
-      throw new BotNotFoundError("Bot Not Found Or User is Already Invited.");
+      throw new BotNotFoundError(
+        "🔥 Bot Not Found Or User is Already Invited."
+      );
 
     userToInviteRecord.InvitedBots.push(botRecord._id);
     botRecord.userModerators.push(userToInviteRecord._id);
@@ -283,12 +288,12 @@ module.exports = class UserService {
     });
     if (!userOwnerRecord) throw new UserNotFoundError();
     if (!userOwnerRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const userToRemoveRecord = await UserModel.findById(userToRemoveId);
     if (!userToRemoveRecord) throw new UserNotFoundError();
     if (!userToRemoveRecord.verified)
-      throw new PermissionError("User Is Not Verified.");
+      throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOneAndUpdate(
       {
@@ -308,7 +313,9 @@ module.exports = class UserService {
     );
 
     if (!botRecord)
-      throw new BotNotFoundError("Bot Not Found Or User is Already Invited.");
+      throw new BotNotFoundError(
+        "🔥 Bot Not Found Or User is Already Invited."
+      );
 
     return _.pick(botRecord, [
       "_id",

@@ -1,6 +1,7 @@
 const winston = require("winston");
 require("winston-mongodb");
 require("express-async-errors");
+const config = require("../../config");
 
 const logLevels = {
   colors: {
@@ -23,7 +24,7 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.File({
       filename: "combined.log",
-      level: "silly",
+      level: config.logLevels,
       handleExceptions: true,
       handleRejections: true,
     }),
@@ -34,7 +35,7 @@ const logger = winston.createLogger({
       handleRejections: true,
     }),
     new winston.transports.MongoDB({
-      db: process.env.MONGO_URI,
+      db: config.databaseURL,
       options: { useUnifiedTopology: true },
       level: "error",
       handleExceptions: true,
@@ -43,7 +44,7 @@ const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== "production") {
+if (config.mode !== "production") {
   logger.add(
     new winston.transports.Console({
       level: "silly",
