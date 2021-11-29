@@ -15,6 +15,7 @@ const BotSchema = new mongoose.Schema(
     },
     replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
     userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    sessionCookies: { type: String, default: "", trim: true },
   },
   { timestamps: true }
 );
