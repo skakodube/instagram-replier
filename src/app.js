@@ -9,7 +9,7 @@ require("./api/loaders/prod")(app);
 
 try {
   app.listen(
-    config.port,
+    process.env.PORT,
     logger.info(`
   #####################################
   🛡️  Server listening on port: ${config.port} 🛡️
