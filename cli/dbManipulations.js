@@ -10,7 +10,7 @@ const addUser = async () => {
     email: '5y.lmwg@gmail.com',
     password: 'smpa-password',
     isAdmin: true,
-    verificationLink: ''
+    verificationLink: '',
   };
 
   const userService = new UserService();
@@ -23,8 +23,8 @@ const addBot = async () => {
     instagramUrl: 'https://www.instagram.com/ffenin/',
     credentials: {
       username: 'ffenin',
-      password: '62956438'
-    }
+      password: '62956438',
+    },
   };
 
   const botService = new BotService();
@@ -33,16 +33,30 @@ const addBot = async () => {
   console.log(response);
 };
 
-const run = async () => {
-  const conn = await mongoose.connect(config.databaseURL, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true
-  });
+const addReply = async () => {
+  const user = {
+    email: '5y.lmwg@gmail.com',
+  };
 
+  const keywords = ['Water', "I'm under the water"];
+
+  const botService = new BotService();
+
+  const response = await botService.addReply(
+    user,
+    '61ab85d2da109d407800cc06',
+    keywords,
+    'https://youtu.be/0Vm2Ug4xnj4'
+  );
+  console.log(response);
+};
+
+const run = async () => {
+  const conn = await mongoose.connect(config.databaseURL);
+
+  await addReply();
   //await addUser();
-  await addBot();
+  //await addBot();
 };
 
 run();
