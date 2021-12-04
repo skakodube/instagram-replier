@@ -68,6 +68,7 @@ router.delete(
 
 router.get(
   //TODO:
+  // PUT PAGENUM AND PAGESIZE IN URL
   //get or post?
   "/reply",
   [
@@ -104,7 +105,7 @@ router.post(
       body: {
         botId: Joi.objectId().required(),
         keywords: Joi.array().items(Joi.string()).required().min(1),
-        reply: Joi.string().required(),
+        answer: Joi.string().required(),
       },
     }),
     auth,
@@ -119,7 +120,7 @@ router.post(
       req.user,
       req.body.botId,
       req.body.keywords,
-      req.body.reply
+      req.body.answer
     );
 
     res.send({ reply });
@@ -134,7 +135,7 @@ router.patch(
         botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
         keywords: Joi.array().items(Joi.string()).required().min(1),
-        reply: Joi.string().required(),
+        answer: Joi.string().required(),
       },
     }),
     auth,
@@ -150,7 +151,7 @@ router.patch(
       req.body.botId,
       req.body.replyId,
       req.body.keywords,
-      req.body.reply
+      req.body.answer
     );
 
     res.send({ reply });

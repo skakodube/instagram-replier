@@ -114,16 +114,16 @@ router.patch(
       "Calling Change-Email endpoint with body: " + JSON.stringify(req.body)
     );
     const userService = new UserService();
-    const { userRecord, oldEmail } = await userService.changeEmail(
+    const { user, oldEmail } = await userService.changeEmail(
       req.user,
       req.body.newEmail,
       req.body.password
     );
     logger.silly("Sending notice email to : " + JSON.stringify(oldEmail));
     const emailService = new EmailService();
-    await emailService.sendChangeNoticeEmail(userRecord, oldEmail);
+    await emailService.sendChangeNoticeEmail(user, oldEmail);
 
-    res.header("x-auth-token", jwt.generateJWT(userRecord)).send("OK");
+    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }
 );
 
@@ -226,7 +226,7 @@ router.patch(
     );
     const userService = new UserService();
 
-    await userService.resetPasswordByEmailtoken(
+    await userService.recoverPasswordByEmailtoken(
       req.body.token,
       req.body.password
     );

@@ -17,6 +17,7 @@ module.exports = {
   port: process.env.PORT || 3000,
 
   databaseURL: process.env.MONGODB_URI,
+  databaseTestURL: process.env.MONGODB_URI_TEST,
 
   jwtSecret: process.env.JWT_SECRET,
 

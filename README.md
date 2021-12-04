@@ -16,6 +16,29 @@ npm run dev
 npm run start
 ```
 
+## Run tests
+```
+npm run test
+```
+to run specific test case change "package.json" file:
+```
+"scripts": {
+    "test": "jest --watchAll --verbose --detectOpenHandles"
+  },
+```
+to
+```
+"scripts": {
+    "test": "jest --group=integration --watchAll --verbose --detectOpenHandles"
+  },
+```
+you can not only choose to run unit or integration test groups, but also nested test groups:
+```
+"scripts": {
+    "test": "jest --group=unit/services/bot --watchAll --verbose --detectOpenHandles"
+  },
+```
+
 
 ## Links
 - Link to the API [Heroku](https://instagram-replier.herokuapp.com/status)

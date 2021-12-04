@@ -12,8 +12,8 @@ module.exports = class UserService {
     if (!userRecord)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
-    const validPassword = await userRecord.comparePassword(user.password);
-    if (!validPassword)
+    const isValidPassword = await userRecord.comparePassword(user.password);
+    if (!isValidPassword)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
     return _.pick(userRecord, [
@@ -95,7 +95,6 @@ module.exports = class UserService {
       resetToken: token,
       resetExpires: { $gt: Date.now() },
     });
-    console.log(userRecord);
 
     if (!userRecord) throw new InvalidTokenError();
 
@@ -115,22 +114,6 @@ module.exports = class UserService {
     ]);
   }
 
-  async resetPasswordByEmailtoken(token, password) {
-    const userRecord = await UserModel.findOne({
-      resetToken: token,
-      resetExpires: { $gt: Date.now() },
-    });
-    if (!userRecord) throw new InvalidTokenError();
-
-    userRecord.password = password;
-    userRecord.resetToken = undefined;
-    userRecord.resetExpires = undefined;
-
-    await userRecord.save();
-
-    return;
-  }
-
   async resetPasswordByPassword(user, oldPassword, newPassword) {
     let userRecord = await UserModel.findOne({
       email: user.email,
@@ -138,8 +121,8 @@ module.exports = class UserService {
     if (!userRecord)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
-    const validPassword = await userRecord.comparePassword(oldPassword);
-    if (!validPassword)
+    const isValidPassword = await userRecord.comparePassword(oldPassword);
+    if (!isValidPassword)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
     userRecord.password = newPassword;
@@ -166,8 +149,8 @@ module.exports = class UserService {
     if (!userRecord)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
-    const validPassword = await userRecord.comparePassword(password);
-    if (!validPassword)
+    const isValidPassword = await userRecord.comparePassword(password);
+    if (!isValidPassword)
       throw new UserNotFoundError("🔥 Invalid Email Or Password.");
 
     const oldEmail = user.email;
@@ -175,7 +158,7 @@ module.exports = class UserService {
 
     await userRecord.save();
 
-    userRecord = _.pick(userRecord, [
+    user = _.pick(userRecord, [
       "_id",
       "firstName",
       "lastName",
@@ -184,9 +167,24 @@ module.exports = class UserService {
       "isAdmin",
     ]);
 
-    return { userRecord, oldEmail };
+    return { user, oldEmail };
   }
 
+  async recoverPasswordByEmailtoken(token, password) {
+    const userRecord = await UserModel.findOne({
+      resetToken: token,
+      resetExpires: { $gt: Date.now() },
+    });
+    if (!userRecord) throw new InvalidTokenError();
+
+    userRecord.password = password;
+    userRecord.resetToken = undefined;
+    userRecord.resetExpires = undefined;
+
+    await userRecord.save();
+
+    return;
+  }
   // async changeEmailByToken(user, token) {
   //   const userRecord = await UserModel.findOne({
   //     email: user.email,

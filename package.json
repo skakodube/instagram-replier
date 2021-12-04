@@ -2,10 +2,11 @@
   "name": "instagram-service",
   "version": "1.0.0",
   "description": "Link to the api\r https://instagram-replier.herokuapp.com/status",
-  "main": "src/app.js",
+  "main": "src/start.js",
   "scripts": {
-    "start": "nodemon app",
-    "dev": "cross-env NODE_ENV=development nodemon app"
+    "start": "nodemon",
+    "dev": "cross-env NODE_ENV=development nodemon",
+    "test": "jest --group=integration --watchAll --verbose --detectOpenHandles"
   },
   "engines": {
     "node": "16.6.1"
@@ -14,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^7.4.2",
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
     "celebrate": "^13.0.4",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -24,17 +25,21 @@
     "express-async-errors": "^3.1.1",
     "fs": "^0.0.1-security",
     "helmet": "^4.6.0",
+    "jest": "^27.4.1",
+    "jest-runner-groups": "^2.1.0",
     "joi": "^17.3.0",
     "joi-objectid": "^3.0.1",
     "joi-password-complexity": "^5.0.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
-    "mongoose": "^5.11.15",
+    "mockingoose": "^2.15.2",
+    "mongoose": "^6.0.14",
     "node-emoji": "^1.11.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.0",
+    "supertest": "^6.1.6",
     "winston": "^3.3.3",
-    "winston-mongodb": "^5.0.5"
+    "winston-mongodb": "^5.0.7"
   },
   "repository": {
     "type": "git",
@@ -47,5 +52,8 @@
   "homepage": "https://github.com/skakodube/instagram-replier#readme",
   "devDependencies": {
     "cross-env": "^7.0.3"
-  }
+  },
+  "jest": {
+    "runner": "groups"
+}
 }

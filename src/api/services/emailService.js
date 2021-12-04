@@ -45,7 +45,7 @@ module.exports = class EmailService {
     const userRecord = await UserModel.findOne({
       email: email,
     });
-    if (!userRecord) return;
+    if (!userRecord) throw new UserNotFoundError();
 
     userRecord.generateReset();
     await userRecord.save();
