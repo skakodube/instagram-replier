@@ -20,7 +20,7 @@ npm run start
 ```
 npm run start
 ```
-to run specific test case change "package.json" file to:
+to run specific test case change "package.json" file:
 ```
 "scripts": {
     "test": "jest --watchAll --verbose --detectOpenHandles"
@@ -32,7 +32,7 @@ to
     "test": "jest --group=integration --watchAll --verbose --detectOpenHandles"
   },
 ```
-you can choose not to run unit or integration tests, but also nested test group:
+you can not only choose to run unit or integration test groups, but also nested test groups:
 ```
 "scripts": {
     "test": "jest --group=unit/services/bot --watchAll --verbose --detectOpenHandles"
