@@ -37,7 +37,7 @@ module.exports = class UserService {
     return userRecordAndBots;
   }
 
-  async createBot(user, instagramUrl) {
+  async createBot(user, {instagramUrl, credentials}) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -53,7 +53,8 @@ module.exports = class UserService {
 
     newBotRecord = new BotModel({
       userCreated: userRecord._id,
-      instagramUrl: instagramUrl,
+      instagramUrl,
+      credentials,
     });
 
     userRecord.OwnedBots.push(newBotRecord._id);
