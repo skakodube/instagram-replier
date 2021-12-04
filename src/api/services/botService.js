@@ -10,7 +10,7 @@ const ReplyAlreadyExistError = require("../errors/replyAlreadyExist");
 const ReplyNotFoundError = require("../errors/replyNotFound");
 const PermissionError = require("../errors/permissionError");
 
-module.exports = class UserService {
+module.exports = class BotService {
   async getBots(user) {
     const userRecordAndBots = await UserModel.findOne({
       email: user.email,
@@ -97,7 +97,6 @@ module.exports = class UserService {
     ]);
   }
 
-  //TODO: Add Pagination
   async getRepliesByBot(user, botId, pageNum, pageSize) {
     const userRecord = await UserModel.findOne({
       email: user.email,
@@ -129,7 +128,7 @@ module.exports = class UserService {
         },
       ])
 
-      .select("userCreated instagramUrl active createdAt");
+      .select("_id userCreated instagramUrl active createdAt");
     if (!botRecordAndReplies) throw new BotNotFoundError();
     //if no more, returs error
 
@@ -175,7 +174,7 @@ module.exports = class UserService {
       "_id",
       "answer",
       "keywords",
-      "botBelogs",
+      "botBelongs",
       "createdAt",
     ]);
   }
@@ -223,8 +222,8 @@ module.exports = class UserService {
     });
     if (!botRecord) throw new BotNotFoundError();
 
-    let editedReplyRecord = await ReplyModel.findByIdAndUpdate(
-      replyId,
+    let editedReplyRecord = await ReplyModel.findOneAndUpdate(
+      { _id: replyId },
       {
         keywords: keywords,
         answer: newAnswer,
@@ -251,6 +250,7 @@ module.exports = class UserService {
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const userToInviteRecord = await UserModel.findById(userToInviteId);
+
     if (!userToInviteRecord) throw new UserNotFoundError();
     if (!userToInviteRecord.verified)
       throw new PermissionError("🔥 User Is Not Verified.");
@@ -307,15 +307,15 @@ module.exports = class UserService {
       { new: true }
     );
 
-    await UserModel.updateOne(
-      { _id: userToRemoveRecord._id },
-      { $pull: { InvitedBots: botRecord._id } }
-    );
-
     if (!botRecord)
       throw new BotNotFoundError(
         "🔥 Bot Not Found Or User is Already Invited."
       );
+
+    await UserModel.updateOne(
+      { _id: userToRemoveRecord._id },
+      { $pull: { InvitedBots: botRecord._id } }
+    );
 
     return _.pick(botRecord, [
       "_id",

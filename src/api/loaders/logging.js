@@ -1,7 +1,8 @@
 const winston = require("winston");
-require("winston-mongodb");
 require("express-async-errors");
 const config = require("../../config");
+
+//if test is running remove db logger
 
 const logLevels = {
   colors: {
@@ -15,33 +16,42 @@ const logLevels = {
 };
 winston.addColors(logLevels);
 
-const logger = winston.createLogger({
-  colorize: true,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({
-      filename: "combined.log",
-      level: config.logLevels,
-      handleExceptions: true,
-      handleRejections: true,
-    }),
-    new winston.transports.File({
-      filename: "error.log",
-      level: "error",
-      handleExceptions: true,
-      handleRejections: true,
-    }),
+const transports = [
+  new winston.transports.File({
+    filename: "combined.log",
+    level: config.logLevels,
+    handleExceptions: true,
+    handleRejections: true,
+  }),
+  new winston.transports.File({
+    filename: "error.log",
+    level: "error",
+    handleExceptions: true,
+    handleRejections: true,
+  }),
+];
+
+//if test is running disable logging to db
+if (typeof jest == "undefined") {
+  require("winston-mongodb");
+  transports.push(
     new winston.transports.MongoDB({
       db: config.databaseURL,
       options: { useUnifiedTopology: true },
       level: "error",
       handleExceptions: true,
       handleRejections: true,
-    }),
-  ],
+    })
+  );
+}
+
+const logger = winston.createLogger({
+  colorize: true,
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports,
 });
 
 if (config.mode !== "production") {
