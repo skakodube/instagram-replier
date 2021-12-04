@@ -38,7 +38,10 @@ router.post(
     );
     const botService = new BotService();
 
-    const bot = await botService.createBot(req.user, req.body.instagramUrl, req.body.username, req.body.password);
+    const instagramUrl = req.body.instagramUrl;
+    const credentials = {username: req.body.username, password: req.body.password}
+
+    const bot = await botService.createBot(req.user, {instagramUrl, credentials});
 
     res.send({ bot });
   }
