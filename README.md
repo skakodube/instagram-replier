@@ -18,7 +18,7 @@ npm run start
 
 ## Run tests
 ```
-npm run start
+npm run test
 ```
 to run specific test case change "package.json" file:
 ```
