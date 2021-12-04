@@ -26,6 +26,8 @@ router.post(
     celebrate({
       body: {
         instagramUrl: Joi.string().required(),
+        username: Joi.string().required(),
+        password: Joi.string().required(),
       },
     }),
     auth,
@@ -36,7 +38,7 @@ router.post(
     );
     const botService = new BotService();
 
-    const bot = await botService.createBot(req.user, req.body.instagramUrl);
+    const bot = await botService.createBot(req.user, req.body.instagramUrl, req.body.username, req.body.password);
 
     res.send({ bot });
   }
