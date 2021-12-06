@@ -17,7 +17,7 @@ describe("/user", () => {
       lastName: "Watney",
       email: "email@email.com",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
     user.password = "12345";
     await user.save();
@@ -55,11 +55,11 @@ describe("/user", () => {
         newPassword: "54321",
       })
       .expect(200)
-      .end((err, res) => {
+      .end(async (err, res) => {
         if (err) {
           return done(err);
         }
-        UserModel.findOne({ email: user.email }).then((res) => {
+        await UserModel.findOne({ email: user.email }).then((res) => {
           expect(res.password).not.toEqual(oldUserPassoword);
         });
         return done();
@@ -96,7 +96,7 @@ describe("/user", () => {
   });
 
   test("PATCH/activate-account", (done) => {
-    user.verified = false;
+    user.isVerified = false;
     user.generateReset();
     user.save();
 
@@ -112,7 +112,7 @@ describe("/user", () => {
         if (err) {
           return done(err);
         }
-        expect(res.body.user.verified).toEqual(true);
+        expect(res.body.user.isVerified).toEqual(true);
         return done();
       });
   });
@@ -128,6 +128,8 @@ describe("/user", () => {
   });
 
   test("PATCH/recover-password", (done) => {
+    const oldUserPassoword = user.password;
+
     user.generateReset();
     user.save();
 
@@ -137,6 +139,15 @@ describe("/user", () => {
         token: user.resetToken,
         password: "54321",
       })
-      .expect(200, done);
+      .expect(200)
+      .end(async (err, res) => {
+        if (err) {
+          return done(err);
+        }
+        await UserModel.findOne({ email: user.email }).then((res) => {
+          expect(res.password).not.toEqual(oldUserPassoword);
+        });
+        return done();
+      });
   });
 });

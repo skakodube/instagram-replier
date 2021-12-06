@@ -23,7 +23,7 @@ describe("userService", () => {
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
     await bcrypt.hash(user.password, 10).then(function (hash) {
       user.password = hash;

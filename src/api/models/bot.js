@@ -19,11 +19,16 @@ const BotSchema = new mongoose.Schema(
         required: true,
       },
     },
-    active: {
+    isActive: {
       type: Boolean,
       default: false,
+      required: true,
     },
     replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
+    defaultReply: {
+      type: String,
+      default: "",
+    },
     userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     sessionCookies: { type: String, default: "", trim: true },
   },

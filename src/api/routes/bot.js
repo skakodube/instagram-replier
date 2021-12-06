@@ -39,9 +39,42 @@ router.post(
     const botService = new BotService();
 
     const instagramUrl = req.body.instagramUrl;
-    const credentials = {username: req.body.username, password: req.body.password}
+    const credentials = {
+      username: req.body.username,
+      password: req.body.password,
+    };
 
-    const bot = await botService.createBot(req.user, {instagramUrl, credentials});
+    const bot = await botService.createBot(req.user, {
+      instagramUrl,
+      credentials,
+    });
+
+    res.send({ bot });
+  }
+);
+
+router.patch(
+  "/isActive",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+        isActive: Joi.boolean().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    logger.debug(
+      "Calling Change-active endpoint with body: " + JSON.stringify(req.body)
+    );
+    const botService = new BotService();
+
+    const bot = await botService.changeBotActive(
+      req.user,
+      req.body.botId,
+      req.body.isActive
+    );
 
     res.send({ bot });
   }
@@ -163,6 +196,36 @@ router.patch(
   }
 );
 
+router.patch(
+  "/reply/isActive",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+        replyId: Joi.objectId().required(),
+        isActive: Joi.boolean().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    logger.debug(
+      "Calling Change-reply-active endpoint with body: " +
+        JSON.stringify(req.body)
+    );
+    const botService = new BotService();
+
+    const reply = await botService.changeBotActive(
+      req.user,
+      req.body.botId,
+      req.body.repplyId,
+      req.body.isActive
+    );
+
+    res.send({ reply });
+  }
+);
+
 router.delete(
   "/reply",
   [
@@ -187,6 +250,33 @@ router.delete(
     );
 
     res.send({ reply });
+  }
+);
+
+router.put(
+  "/default-reply",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+        defaultReply: Joi.string().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    logger.debug(
+      "Calling Delete-Reply endpoint with body: " + JSON.stringify(req.body)
+    );
+    const botService = new BotService();
+
+    const bot = await botService.editDefaultReply(
+      req.user,
+      req.body.botId,
+      req.body.defaultReply
+    );
+
+    res.send({ bot });
   }
 );
 

@@ -19,7 +19,7 @@ describe("/bot", () => {
       lastName: "Watney",
       email: "email@email.com",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
     user.password = "12345";
     await user.save();
@@ -28,7 +28,7 @@ describe("/bot", () => {
       lastName: "Doe",
       email: "annadoe@email.com",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
     userToInvite.password = "12345";
     await userToInvite.save();
@@ -45,6 +45,10 @@ describe("/bot", () => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
     user.OwnedBots.push(newBotRecord._id);
     user.save();
@@ -68,6 +72,8 @@ describe("/bot", () => {
       .set("x-auth-token", authToken)
       .send({
         instagramUrl: "url1",
+        username: "abc",
+        password: "abc",
       })
       .expect("Content-Type", /json/)
       .expect(200)
@@ -77,10 +83,42 @@ describe("/bot", () => {
         return done();
       });
   });
+  test("PATCH/", (done) => {
+    const newBotRecord = new BotModel({
+      userCreated: user._id,
+      instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
+    });
+    user.OwnedBots.push(newBotRecord._id);
+    user.save();
+    newBotRecord.save();
+
+    request(app)
+      .patch("/bot/isActive")
+      .set("x-auth-token", authToken)
+      .send({
+        botId: newBotRecord._id,
+        isActive: false,
+      })
+      .expect("Content-Type", /json/)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body.bot.isActive).toEqual(false);
+        return done();
+      });
+  });
   test("DELETE/", (done) => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
     user.OwnedBots.push(newBotRecord._id);
     user.save();
@@ -105,6 +143,10 @@ describe("/bot", () => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
     const newReply = new ReplyModel({
       botBelongs: newBotRecord._id,
@@ -141,6 +183,10 @@ describe("/bot", () => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
 
     user.OwnedBots.push(newBotRecord._id);
@@ -169,6 +215,10 @@ describe("/bot", () => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
     const newReply = new ReplyModel({
       botBelongs: newBotRecord._id,
@@ -204,10 +254,55 @@ describe("/bot", () => {
         return done();
       });
   });
+
+  test("PATCH/reply/isActive", (done) => {
+    const isActive = false;
+    const newBotRecord = new BotModel({
+      userCreated: user._id,
+      instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
+    });
+    const newReply = new ReplyModel({
+      botBelongs: newBotRecord._id,
+      keywords: ["keyword1", "keyword2"],
+      answer: "answer",
+      isActive: true,
+    });
+
+    user.OwnedBots.push(newBotRecord._id);
+    newBotRecord.replies.push(newReply._id);
+
+    user.save();
+    newBotRecord.save();
+    newReply.save();
+
+    request(app)
+      .patch("/bot/reply/isActive")
+      .set("x-auth-token", authToken)
+      .send({
+        botId: newBotRecord._id,
+        replyId: newReply._id,
+        isActive: isActive,
+      })
+      .expect("Content-Type", /json/)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body.reply.isActive).toEqual(isActive);
+        return done();
+      });
+  });
   test("DELELE/reply", (done) => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
     const newReply = new ReplyModel({
       botBelongs: newBotRecord._id,
@@ -238,10 +333,44 @@ describe("/bot", () => {
         return done();
       });
   });
+  test("PUT/default-reply", (done) => {
+    const newBotRecord = new BotModel({
+      userCreated: user._id,
+      instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
+    });
+
+    user.OwnedBots.push(newBotRecord._id);
+
+    user.save();
+    newBotRecord.save();
+
+    request(app)
+      .put("/bot/default-reply")
+      .set("x-auth-token", authToken)
+      .send({
+        botId: newBotRecord._id,
+        defaultReply: "hello",
+      })
+      .expect("Content-Type", /json/)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body.bot.defaultReply).toEqual("hello");
+        return done();
+      });
+  });
   test("PATCH/invite-moderator", (done) => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
 
     user.OwnedBots.push(newBotRecord._id);
@@ -273,6 +402,10 @@ describe("/bot", () => {
     const newBotRecord = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
+      credentials: {
+        username: "abc",
+        password: "abc",
+      },
     });
 
     user.OwnedBots.push(newBotRecord._id);

@@ -17,7 +17,7 @@ describe("/auth", () => {
       lastName: "Watney",
       email: "email@email.com",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
     user.password = "12345";
     await user.save();

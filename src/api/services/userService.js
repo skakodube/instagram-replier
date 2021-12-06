@@ -21,7 +21,7 @@ module.exports = class UserService {
       "firstName",
       "lastName",
       "email",
-      "verified",
+      "isVerified",
       "isAdmin",
     ]);
   }
@@ -44,7 +44,7 @@ module.exports = class UserService {
       "firstName",
       "lastName",
       "email",
-      "verified",
+      "isVerified",
       "isAdmin",
     ]);
   }
@@ -60,7 +60,7 @@ module.exports = class UserService {
   //     "firstName",
   //     "lastName",
   //     "email",
-  //     "verified",
+  //     "isVerified",
   //     "isAdmin",
   //   ]);
   // }
@@ -84,7 +84,7 @@ module.exports = class UserService {
       "firstName",
       "lastName",
       "email",
-      "verified",
+      "isVerified",
       "isAdmin",
     ]);
   }
@@ -100,7 +100,7 @@ module.exports = class UserService {
 
     userRecord.resetToken = undefined;
     userRecord.resetExpires = undefined;
-    userRecord.verified = true;
+    userRecord.isVerified = true;
 
     await userRecord.save();
 
@@ -109,7 +109,7 @@ module.exports = class UserService {
       "firstName",
       "lastName",
       "email",
-      "verified",
+      "isVerified",
       "isAdmin",
     ]);
   }
@@ -163,7 +163,7 @@ module.exports = class UserService {
       "firstName",
       "lastName",
       "email",
-      "verified",
+      "isVerified",
       "isAdmin",
     ]);
 

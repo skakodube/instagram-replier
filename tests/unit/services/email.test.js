@@ -20,7 +20,7 @@ describe("emailService", () => {
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",
-      verified: true,
+      isVerified: true,
     });
   });
   afterEach(() => {
