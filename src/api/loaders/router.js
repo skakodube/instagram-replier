@@ -10,11 +10,7 @@ const bot = require("../routes/bot");
 
 module.exports = function (app) {
   app.use(express.json());
-  app.use(cors());
-  app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Headers", "*");
-    next();
-  });
+  app.use(cors({ exposedHeaders: ["x-auth-token"] }));
 
   app.get("/status", (req, res) => {
     res.status(200).end();

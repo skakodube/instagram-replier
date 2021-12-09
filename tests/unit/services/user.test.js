@@ -13,9 +13,29 @@ const InvalidTokenError = require("../../../src/api/errors/invalidToken");
 const UserService = require("../../../src/api/services/userService");
 const bcrypt = require("bcrypt");
 
+const userService = new UserService();
+let user;
+
+async function runTestUserNotFound(callback, strDbMock = "findOne") {
+  it("should return error if user is not registered", async () => {
+    mockingoose(UserModel).toReturn(new UserNotFoundError(), strDbMock); //db mock
+
+    return await callback().catch((err) => {
+      expect(err).toBeInstanceOf(UserNotFoundError);
+    });
+  });
+}
+async function runTestInvalidPassword(callback) {
+  it("should return error if password is invalid", async () => {
+    mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+
+    return await callback().catch((err) => {
+      expect(err).toBeInstanceOf(UserNotFoundError);
+    });
+  });
+}
+
 describe("userService", () => {
-  const userService = new UserService();
-  let user;
   beforeEach(async () => {
     user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
@@ -33,7 +53,7 @@ describe("userService", () => {
     mockingoose(UserModel).reset();
   });
   describe("login", () => {
-    it("should return loggined user", async () => {
+    it("should return logined user", async () => {
       mockingoose(UserModel).toReturn(user, "findOne"); //db mock
 
       const result = await userService.login({
@@ -42,24 +62,14 @@ describe("userService", () => {
       });
       expect(user).toMatchObject(result);
     });
-    it("should return error if user is not registered", async () => {
-      mockingoose(UserModel).toReturn(new UserNotFoundError(), "findOne"); //db mock
-
-      return await userService.login(user).catch((err) => {
-        expect(err).toBeInstanceOf(UserNotFoundError);
-      });
+    runTestUserNotFound(async function () {
+      await userService.login(user);
     });
-    it("should return error if password is invalid", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-
-      return await userService
-        .login({
-          email: "email@email.com",
-          password: "1",
-        })
-        .catch((err) => {
-          expect(err).toBeInstanceOf(UserNotFoundError);
-        });
+    runTestInvalidPassword(async function () {
+      await userService.login({
+        email: "email@email.com",
+        password: "1",
+      });
     });
   });
   describe("signup", () => {
@@ -97,16 +107,9 @@ describe("userService", () => {
       expect(result).toHaveProperty("firstName", "Anna");
       expect(result).toHaveProperty("lastName", "Doe");
     });
-    it("should return error if user is not registered", async () => {
-      mockingoose(UserModel).toReturn(
-        new UserNotFoundError(),
-        "findOneAndUpdate"
-      ); //db mock
-
-      return await userService.edit(user, "Anna", "Doe").catch((err) => {
-        expect(err).toBeInstanceOf(UserNotFoundError);
-      });
-    });
+    runTestUserNotFound(async function () {
+      await userService.edit(user, "Anna", "Doe");
+    }, "findOneAndUpdate");
   });
   describe("resetPasswordByPassword", () => {
     it("should reset password if password is correct", async () => {
@@ -120,23 +123,11 @@ describe("userService", () => {
       });
       expect(newPassword).not.toBe(oldPassword);
     });
-    it("should return error if user is not registered", async () => {
-      mockingoose(UserModel).toReturn(new UserNotFoundError(), "findOne"); //db mock
-
-      return await userService
-        .resetPasswordByPassword(user, "12345", "54321")
-        .catch((err) => {
-          expect(err).toBeInstanceOf(UserNotFoundError);
-        });
+    runTestUserNotFound(async function () {
+      await userService.resetPasswordByPassword(user, "12345", "54321");
     });
-    it("should return error if password is invalid", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-
-      return await userService
-        .resetPasswordByPassword(user, "1", "54321")
-        .catch((err) => {
-          expect(err).toBeInstanceOf(UserNotFoundError);
-        });
+    runTestInvalidPassword(async function () {
+      await userService.resetPasswordByPassword(user, "12345", "54321");
     });
   });
   describe("recoverPasswordByEmailtoken", () => {
@@ -158,6 +149,7 @@ describe("userService", () => {
         });
     });
   });
+
   //   describe("changeEmail", () => {
   //NON TESTABLE
   // it("should return user with changed email, if password is correct", async () => {
