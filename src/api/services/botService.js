@@ -31,7 +31,7 @@ module.exports = class BotService {
       ])
       .select("email firstName lastName isVerified isAdmin dateRegistered");
     if (!userRecordAndBots) throw new UserNotFoundError();
-    if (!userRecordAndBots.isVerified)
+    if (userRecordAndBots.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     return userRecordAndBots;
@@ -42,7 +42,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     let botRecord = await BotModel.findOne({
