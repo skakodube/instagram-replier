@@ -14,8 +14,12 @@ module.exports = async function () {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     });
-    logger.info(`✌️ MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`✌️ MongoDB Connected to: ${conn.connection.host}`);
   } catch (error) {
     logger.error(`⚠️ Failed connect to MongoDB: ${error} ⚠️`);
   }
+
+  mongoose.connection.on("error", (error) => {
+    logger.error(`⚠️ Unexpected MongoDB Error: ${error} ⚠️`);
+  });
 };

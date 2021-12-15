@@ -11,7 +11,6 @@ const bot = require("../routes/bot");
 module.exports = function (app) {
   app.use(express.json());
   app.use(cors({ exposedHeaders: ["x-auth-token"] }));
-
   app.get("/status", (req, res) => {
     res.status(200).end();
   });
@@ -22,6 +21,7 @@ module.exports = function (app) {
   app.use("/auth", auth);
   app.use("/user", user);
   app.use("/bot", bot);
+
   app.use(joiError());
   app.use(errorLogger);
   app.use(errorResponder);
