@@ -77,7 +77,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOneAndUpdate(
@@ -103,7 +103,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOneAndDelete({
@@ -130,7 +130,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecordAndReplies = await BotModel.findById({
@@ -168,7 +168,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({
@@ -213,7 +213,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({
@@ -247,7 +247,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({ _id: botId });
@@ -277,7 +277,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOne({
@@ -307,7 +307,7 @@ module.exports = class BotService {
       email: user.email,
     });
     if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
+    if (userRecord.isVerified)
       throw new PermissionError("🔥 User Is Not Verified.");
 
     const botRecord = await BotModel.findOneAndUpdate(
