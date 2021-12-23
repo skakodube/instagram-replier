@@ -14,7 +14,7 @@ describe("user.comparePassword", () => {
     password = "12345";
     const user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "email@email.com",
+      email: "skakodube@gmail.com",
       firstName: "Mark",
       lastName: "Watney",
     });
@@ -32,7 +32,7 @@ describe("user.generateReset", () => {
   it("should set resetToken to randomString of 40", () => {
     const user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "email@email.com",
+      email: "skakodube@gmail.com",
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",
@@ -45,7 +45,7 @@ describe("user.generateReset", () => {
   it("should set token expiration to 1 hour", () => {
     const user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "email@email.com",
+      email: "skakodube@gmail.com",
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",

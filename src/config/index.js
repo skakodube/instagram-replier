@@ -28,6 +28,9 @@ module.exports = {
   emails: {
     apiKey: process.env.SENDGRID_API_KEY,
     apiSender: process.env.SENDGRID_SENDER,
+    verificationTemplate: process.env.SENDGRID_VERIFICATION_TEMPLATE,
+    recoverTemplate: process.env.SENDGRID_RECOVER_TEMPLAE,
+    noticeTemplate: process.env.SENDGRID_NOTICE_TEMPLATE,
   },
 
   mode: process.env.NODE_ENV || "development",

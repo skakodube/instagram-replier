@@ -5,9 +5,9 @@ const UserNotFoundError = require("../errors/userNotFound");
 const config = require("../../config");
 
 sgMail.setApiKey(config.emails.apiKey);
-const verificationTemplate = "d-ca65d168fe664892932fa88d075dedbb";
-const resetPasswordTemplate = "d-12526fb4c21549d8901548fdfe19ae43";
-const changeEmailNoticeTemplate = "d-337ff99209a54ca89f99680fb9620c4d";
+const verificationTemplate = config.emails.verificationTemplate;
+const resetPasswordTemplate = config.emails.recoverTemplate;
+const changeEmailNoticeTemplate = config.emails.noticeTemplate;
 const emailFrom = config.emails.apiSender;
 
 module.exports = class EmailService {
@@ -26,8 +26,9 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
+        user_name: userRecord.firstName,
         Weblink:
-          //confirmLink +
+          //confirmLink
           "https://instagram.replier.com/account/confirm/" +
           userRecord.resetToken,
       },
@@ -55,8 +56,8 @@ module.exports = class EmailService {
       from: emailFrom,
       dynamic_template_data: {
         Weblink:
-          //resetLink +
-          "https://instagram.replier.com/account/reset/" +
+          //confirmLink
+          "https://instagram.replier.com/account/recover/" +
           userRecord.resetToken,
       },
       template_id: resetPasswordTemplate,

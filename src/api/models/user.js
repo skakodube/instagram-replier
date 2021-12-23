@@ -75,7 +75,7 @@ UserSchema.methods.comparePassword = async function (password) {
 
 UserSchema.methods.generateReset = function () {
   this.resetToken = crypto.randomBytes(20).toString("hex");
-  this.resetExpires = Date.now() + 3600000; //expires in an hour
+  this.resetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; //expires in a week
 };
 
 module.exports = mongoose.model("User", UserSchema);
