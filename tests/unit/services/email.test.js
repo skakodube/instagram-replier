@@ -35,7 +35,7 @@ describe("emailService", () => {
   beforeEach(() => {
     user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "email@email.com",
+      email: "skakodube@gmail.com",
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",

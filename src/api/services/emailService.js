@@ -5,9 +5,9 @@ const UserNotFoundError = require("../errors/userNotFound");
 const config = require("../../config");
 
 sgMail.setApiKey(config.emails.apiKey);
-const verificationTemplate = "d-07c92790d29b4f82a22ef1b711c20190";
-const resetPasswordTemplate = "d-c8e41e53a34c4c7e90baca21f2014c0d";
-const changeEmailNoticeTemplate = "d-09c1910ee1944f4b8a2ea699cd43ddd6";
+const verificationTemplate = "d-ca65d168fe664892932fa88d075dedbb";
+const resetPasswordTemplate = "d-12526fb4c21549d8901548fdfe19ae43";
+const changeEmailNoticeTemplate = "d-337ff99209a54ca89f99680fb9620c4d";
 const emailFrom = config.emails.apiSender;
 
 module.exports = class EmailService {

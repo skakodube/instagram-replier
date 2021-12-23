@@ -15,7 +15,7 @@ describe("/user", () => {
     user = new UserModel({
       firstName: "Mark",
       lastName: "Watney",
-      email: "email@email.com",
+      email: "skakodube@gmail.com",
       password: "12345",
       isVerified: true,
     });
