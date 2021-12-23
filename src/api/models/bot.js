@@ -8,6 +8,7 @@ const BotSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    profilePicture: String,
     instagramUrl: String,
     credentials: {
       username: {

@@ -19,7 +19,7 @@ module.exports = class BotService {
         {
           path: "OwnedBots",
           model: "Bot",
-          select: "_id instagramUrl isActive dateCreated",
+          select: "_id instagramUrl isActive profilePicture dateCreated",
         },
       ])
       .populate([
