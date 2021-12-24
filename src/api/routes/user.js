@@ -121,7 +121,7 @@ router.patch(
     );
     logger.silly("Sending notice email to : " + JSON.stringify(oldEmail));
     const emailService = new EmailService();
-    await emailService.sendChangeNoticeEmail(user, oldEmail);
+    await emailService.sendChangeNoticeEmail(user.email, oldEmail);
 
     res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
   }

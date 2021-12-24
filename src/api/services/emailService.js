@@ -68,12 +68,12 @@ module.exports = class EmailService {
     });
   }
 
-  async sendChangeNoticeEmail(user, oldEmail) {
+  async sendChangeNoticeEmail(email, oldEmail) {
     let msg = {
       to: oldEmail,
       from: emailFrom,
       dynamic_template_data: {
-        newEmail: user.email,
+        newEmail: email,
       },
       template_id: changeEmailNoticeTemplate,
     };

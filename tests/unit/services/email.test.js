@@ -8,13 +8,14 @@ const mongoose = require("mongoose");
 const mockingoose = require("mockingoose");
 const UserModel = require("../../../src/api/models/user");
 const UserNotFoundError = require("../../../src/api/errors/userNotFound");
+const EmailError = require("../../../src/api/errors/emailError");
 const EmailService = require("../../../src/api/services/emailService");
-
+const sgMail = require("@sendgrid/mail");
 const emailService = new EmailService();
-let user;
 
-async function runTestSendVerificationEmail(callback) {
+async function runTestSendEmail(callback) {
   it("should generate token for user, if email is valid", async () => {
+    sgMail.send = jest.fn().mockResolvedValue();
     mockingoose(UserModel).toReturn(user, "findOne"); //db mock
 
     await callback();
@@ -22,15 +23,28 @@ async function runTestSendVerificationEmail(callback) {
     expect(user).toHaveProperty("resetExpires");
   });
 }
-async function runTestEmailNotFound(callback) {
-  it("should return error if email is not registered", async () => {
-    mockingoose(UserModel).toReturn(new UserNotFoundError(), "findOne"); //db mock
+async function runTestUserNotFound(callback) {
+  it("should return error if user is not registered", async () => {
+    sgMail.send = jest.fn().mockResolvedValue();
+
+    mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
+
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(UserNotFoundError);
     });
   });
 }
+async function runTestEmailError(callback) {
+  it("should return error if email is not registered", async () => {
+    sgMail.send = jest.fn().mockRejectedValue(new EmailError());
+    mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    return await callback().catch((err) => {
+      expect(err).toBeInstanceOf(EmailError);
+    });
+  });
+}
 
+let user;
 describe("emailService", () => {
   beforeEach(() => {
     user = new UserModel({
@@ -46,19 +60,44 @@ describe("emailService", () => {
     mockingoose(UserModel).reset();
   });
   describe("sendVerificationEmail", () => {
-    runTestSendVerificationEmail(async function () {
+    runTestSendEmail(async function () {
       await emailService.sendVerificationEmail(user.email, "link");
     });
-    runTestEmailNotFound(async function () {
-      await emailService.sendVerificationEmail("a", "link");
+    runTestEmailError(async function () {
+      await emailService.sendVerificationEmail(user.email, "link");
+    });
+    // runTestUserNotFound(async function () {
+    //   await emailService.sendVerificationEmail(user.email, "link");
+    // });
+    it("should return error if user is not registered", async () => {
+      sgMail.send = jest.fn().mockResolvedValue();
+
+      mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
+
+      return await emailService
+        .sendVerificationEmail(user.email, "link")
+        .catch((err) => {
+          expect(err).toBeInstanceOf(UserNotFoundError);
+        });
     });
   });
   describe("sendRecoverPasswordEmail", () => {
-    runTestSendVerificationEmail(async function () {
+    runTestSendEmail(async function () {
       await emailService.sendRecoverPasswordEmail(user.email, "link");
     });
-    runTestEmailNotFound(async function () {
-      await emailService.sendVerificationEmail("a", "link");
+    runTestEmailError(async function () {
+      await emailService.sendRecoverPasswordEmail(user.email, "link");
+    });
+    runTestUserNotFound(async function () {
+      await emailService.sendRecoverPasswordEmail(user.email, "link");
+    });
+  });
+  describe("sendChangeNoticeEmail", () => {
+    runTestEmailError(async function () {
+      await emailService.sendChangeNoticeEmail(
+        user.email,
+        "oldemail@email.com"
+      );
     });
   });
 });

@@ -18,7 +18,7 @@ let user;
 
 async function runTestUserNotFound(callback, strDbMock = "findOne") {
   it("should return error if user is not registered", async () => {
-    mockingoose(UserModel).toReturn(new UserNotFoundError(), strDbMock); //db mock
+    mockingoose(UserModel).toReturn(undefined, strDbMock); //db mock
 
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(UserNotFoundError);
@@ -43,7 +43,6 @@ describe("userService", () => {
       firstName: "Mark",
       lastName: "Watney",
       password: "12345",
-      isVerified: true,
     });
     await bcrypt.hash(user.password, 10).then(function (hash) {
       user.password = hash;
@@ -84,7 +83,7 @@ describe("userService", () => {
       expect(result).toHaveProperty("_id");
     });
     it("should return error if user with this email is already registered", async () => {
-      mockingoose(UserModel).toReturn(new UserAlreadyExistError(), "findOne"); //db mock
+      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
 
       return await userService
         .signup({
@@ -111,6 +110,23 @@ describe("userService", () => {
       await userService.edit(user, "Anna", "Doe");
     }, "findOneAndUpdate");
   });
+
+  describe("activateAccount", () => {
+    it("should return verified user user", async () => {
+      user.isVerified = true;
+      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+      const result = await userService.activateAccount(user, "token");
+      expect(result).toHaveProperty("isVerified", true);
+    });
+    it("should return error if token is invalid", async () => {
+      mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
+
+      return await userService.activateAccount(user, "token").catch((err) => {
+        expect(err).toBeInstanceOf(InvalidTokenError);
+      });
+    });
+  });
+
   describe("resetPasswordByPassword", () => {
     it("should reset password if password is correct", async () => {
       const oldPassword = user.password;
@@ -127,7 +143,7 @@ describe("userService", () => {
       await userService.resetPasswordByPassword(user, "12345", "54321");
     });
     runTestInvalidPassword(async function () {
-      await userService.resetPasswordByPassword(user, "12345", "54321");
+      await userService.resetPasswordByPassword(user, "1", "54321");
     });
   });
   describe("recoverPasswordByEmailtoken", () => {
@@ -140,7 +156,7 @@ describe("userService", () => {
     });
 
     it("should return error if token is invalid", async () => {
-      mockingoose(UserModel).toReturn(new InvalidTokenError(), "findOne"); //db mock
+      mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
 
       return await userService
         .recoverPasswordByEmailtoken("a", "54321")
@@ -150,17 +166,19 @@ describe("userService", () => {
     });
   });
 
-  //   describe("changeEmail", () => {
-  //NON TESTABLE
-  // it("should return user with changed email, if password is correct", async () => {
-  //   mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-  //   const result = await userService.changeEmail(
-  //     user,
-  //     "newemail@email.com",
-  //     "12345"
-  //   );
-  //   expect(result).toHaveProperty("_id", user._id);
-  //   expect(result).toHaveProperty("email", "newemail@email.com");
-  //    });
+  // NON TESTABLE
+  //two different db mocks on of single function
+  // describe("changeEmail", () => {
+  //   it("should return user with changed email, if password is correct", async () => {
+  //     mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
+  //     mockingoose(UserModel).toReturn(user, "findById"); //db mock
+  //     const result = await userService.changeEmail(
+  //       user,
+  //       "newemail@email.com",
+  //       "12345"
+  //     );
+  //     expect(result).toHaveProperty("_id", user._id);
+  //     expect(result).toHaveProperty("email", "newemail@email.com");
+  //   });
   // });
 });

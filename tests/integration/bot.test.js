@@ -12,12 +12,12 @@ const ReplyModel = require("../../src/api/models/reply");
 const jwtHelper = require("../../src/api/helpers/jwt");
 
 describe("/bot", () => {
-  let user, userToInvite, authToken;
+  let user, bot, userToInvite, authToken;
   beforeAll(async () => {
     user = new UserModel({
       firstName: "Mark",
       lastName: "Watney",
-      email: "email@email.com",
+      email: "markwatney@email.com",
       password: "12345",
       isVerified: true,
     });
@@ -34,15 +34,8 @@ describe("/bot", () => {
     await userToInvite.save();
     authToken = jwtHelper.generateJWT(user);
   });
-  afterEach(async () => {
-    await BotModel.deleteMany({});
-    await ReplyModel.deleteMany({});
-  });
-  afterAll(async () => {
-    await UserModel.deleteMany({});
-  });
-  test("GET/", (done) => {
-    const newBotRecord = new BotModel({
+  beforeEach(async () => {
+    bot = new BotModel({
       userCreated: user._id,
       instagramUrl: "url1",
       credentials: {
@@ -50,24 +43,33 @@ describe("/bot", () => {
         password: "abc",
       },
     });
-    user.OwnedBots.push(newBotRecord._id);
-    user.save();
-    newBotRecord.save();
-
-    request(app)
+    user.OwnedBots.push(bot._id);
+    await user.save();
+    await bot.save();
+  });
+  afterEach(async () => {
+    user.OwnedBots.pull(bot._id);
+    await user.save();
+    await BotModel.deleteMany({});
+    await ReplyModel.deleteMany({});
+  });
+  afterAll(async () => {
+    await UserModel.deleteMany({});
+  });
+  test("GET/", async () => {
+    await request(app)
       .get("/bot/")
       .set("x-auth-token", authToken)
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.user._id).toEqual(user._id.toString());
         expect(res.body.user.OwnedBots[0].instagramUrl).toEqual("url1");
-        return done();
       });
   });
-  test("POST/", (done) => {
-    request(app)
+  test("POST/", async () => {
+    await BotModel.findOneAndDelete(bot._id);
+    await request(app)
       .post("/bot/")
       .set("x-auth-token", authToken)
       .send({
@@ -77,361 +79,222 @@ describe("/bot", () => {
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.bot.instagramUrl).toEqual("url1");
-        return done();
       });
   });
-  test("PATCH/", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    user.OwnedBots.push(newBotRecord._id);
-    user.save();
-    newBotRecord.save();
 
-    request(app)
+  test("PATCH/", async () => {
+    await request(app)
       .patch("/bot/isActive")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
+        botId: bot._id,
         isActive: false,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.bot.isActive).toEqual(false);
-        return done();
       });
   });
-  test("DELETE/", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    user.OwnedBots.push(newBotRecord._id);
-    user.save();
-    newBotRecord.save();
 
-    request(app)
-      .delete("/bot/")
+  test("DELETE/", async () => {
+    await request(app)
+      .delete("/bot")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
+        botId: bot._id,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body.bot._id).toEqual(newBotRecord._id.toString());
+      .then(async (res) => {
+        expect(res.body.bot._id).toEqual(bot._id.toString());
         expect(res.body.bot.instagramUrl).toEqual("url1");
-        return done();
       });
   });
-  test("GET/reply", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    const newReply = new ReplyModel({
-      botBelongs: newBotRecord._id,
+  test("GET/reply", async () => {
+    const reply = new ReplyModel({
+      botBelongs: bot._id,
       keywords: ["keyword1", "keyword2"],
       answer: "answer",
     });
 
-    user.OwnedBots.push(newBotRecord._id);
-    newBotRecord.replies.push(newReply._id);
+    bot.replies.push(reply._id);
 
-    user.save();
-    newBotRecord.save();
-    newReply.save();
+    await bot.save();
+    await reply.save();
 
-    request(app)
+    await request(app)
       .get("/bot/reply")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
+        botId: bot._id,
         pageNum: 1,
         pageSize: 10,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body.bot._id).toEqual(newBotRecord._id.toString());
-        expect(res.body.bot.replies[0].answer).toEqual(newReply.answer);
-        expect(res.body.bot.replies[0].keywords).toEqual(newReply.keywords);
-        return done();
+      .then((res) => {
+        expect(res.body.bot._id).toEqual(bot._id.toString());
+        expect(res.body.bot.replies[0].answer).toEqual(reply.answer);
+        expect(res.body.bot.replies[0].keywords).toEqual(reply.keywords);
       });
   });
-  test("POST/reply", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-
-    user.OwnedBots.push(newBotRecord._id);
-
-    user.save();
-    newBotRecord.save();
-
-    request(app)
+  test("POST/reply", async () => {
+    await request(app)
       .post("/bot/reply")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
+        botId: bot._id,
         keywords: ["keyword1", "keyword2"],
         answer: "answer",
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.reply.answer).toEqual("answer");
         expect(res.body.reply.keywords).toEqual(["keyword1", "keyword2"]);
-        return done();
       });
   });
-  test("PATCH/reply", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    const newReply = new ReplyModel({
-      botBelongs: newBotRecord._id,
+  test("PATCH/reply", async () => {
+    const reply = new ReplyModel({
+      botBelongs: bot._id,
       keywords: ["keyword1", "keyword2"],
       answer: "answer",
     });
 
-    user.OwnedBots.push(newBotRecord._id);
-    newBotRecord.replies.push(newReply._id);
+    bot.replies.push(reply._id);
 
-    user.save();
-    newBotRecord.save();
-    newReply.save();
+    await bot.save();
+    await reply.save();
 
-    request(app)
+    await request(app)
       .patch("/bot/reply")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
-        replyId: newReply._id,
+        botId: bot._id,
+        replyId: reply._id,
         keywords: ["new keyword1", "new keyword2"],
         answer: "new answer",
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.reply.answer).toEqual("new answer");
         expect(res.body.reply.keywords).toEqual([
           "new keyword1",
           "new keyword2",
         ]);
-        return done();
       });
   });
 
-  test("PATCH/reply/isActive", (done) => {
+  test("PATCH/reply/isActive", async () => {
     const isActive = false;
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    const newReply = new ReplyModel({
-      botBelongs: newBotRecord._id,
+
+    const reply = new ReplyModel({
+      botBelongs: bot._id,
       keywords: ["keyword1", "keyword2"],
       answer: "answer",
       isActive: true,
     });
 
-    user.OwnedBots.push(newBotRecord._id);
-    newBotRecord.replies.push(newReply._id);
+    bot.replies.push(reply._id);
 
-    user.save();
-    newBotRecord.save();
-    newReply.save();
+    await bot.save();
+    await reply.save();
 
-    request(app)
+    await request(app)
       .patch("/bot/reply/isActive")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
-        replyId: newReply._id,
+        botId: bot._id,
+        replyId: reply._id,
         isActive: isActive,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.reply.isActive).toEqual(isActive);
-        return done();
       });
   });
-  test("DELELE/reply", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-    const newReply = new ReplyModel({
-      botBelongs: newBotRecord._id,
+  test("DELELE/reply", async () => {
+    const reply = new ReplyModel({
+      botBelongs: bot._id,
       keywords: ["keyword1", "keyword2"],
       answer: "answer",
     });
 
-    user.OwnedBots.push(newBotRecord._id);
-    newBotRecord.replies.push(newReply._id);
+    bot.replies.push(reply._id);
 
-    user.save();
-    newBotRecord.save();
-    newReply.save();
+    await bot.save();
+    await reply.save();
 
-    request(app)
+    await request(app)
       .delete("/bot/reply")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
-        replyId: newReply._id,
+        botId: bot._id,
+        replyId: reply._id,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.reply.answer).toEqual("answer");
         expect(res.body.reply.keywords).toEqual(["keyword1", "keyword2"]);
-        return done();
       });
   });
-  test("PUT/default-reply", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
-
-    user.OwnedBots.push(newBotRecord._id);
-
-    user.save();
-    newBotRecord.save();
-
-    request(app)
+  test("PUT/default-reply", async () => {
+    await request(app)
       .put("/bot/default-reply")
       .set("x-auth-token", authToken)
       .send({
-        botId: newBotRecord._id,
+        botId: bot._id,
         defaultReply: "hello",
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
+      .then((res) => {
         expect(res.body.bot.defaultReply).toEqual("hello");
-        return done();
       });
   });
-  test("PATCH/invite-moderator", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
 
-    user.OwnedBots.push(newBotRecord._id);
-
-    user.save();
-    newBotRecord.save();
-
-    request(app)
+  test("PATCH/invite-moderator", async () => {
+    await request(app)
       .patch("/bot/invite-moderator")
       .set("x-auth-token", authToken)
       .send({
         userToInviteId: userToInvite._id,
-        botId: newBotRecord._id,
+        botId: bot._id,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-        expect(res.body.bot._id).toEqual(newBotRecord._id.toString());
+      .then((res) => {
+        expect(res.body.bot._id).toEqual(bot._id.toString());
         expect(res.body.bot.userModerators[0]).toEqual(
           userToInvite._id.toString()
         );
-        return done();
       });
   });
-  test("PATCH/remove-moderator", (done) => {
-    const newBotRecord = new BotModel({
-      userCreated: user._id,
-      instagramUrl: "url1",
-      credentials: {
-        username: "abc",
-        password: "abc",
-      },
-    });
+  test("PATCH/remove-moderator", async () => {
+    bot.userModerators.push(userToInvite._id);
+    userToInvite.InvitedBots.push(bot._id);
 
-    user.OwnedBots.push(newBotRecord._id);
-    newBotRecord.userModerators.push(userToInvite._id);
-    userToInvite.InvitedBots.push(newBotRecord._id);
+    await userToInvite.save();
+    await bot.save();
 
-    userToInvite.save();
-    user.save();
-    newBotRecord.save();
-
-    request(app)
+    await request(app)
       .patch("/bot/remove-moderator")
       .set("x-auth-token", authToken)
       .send({
         userToRemoveId: userToInvite._id,
-        botId: newBotRecord._id,
+        botId: bot._id,
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-        expect(res.body.bot._id).toEqual(newBotRecord._id.toString());
+      .then((res) => {
+        expect(res.body.bot._id).toEqual(bot._id.toString());
         expect(res.body.bot.userModerators).toEqual([]);
-        return done();
       });
   });
 });

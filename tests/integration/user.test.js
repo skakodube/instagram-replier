@@ -26,8 +26,8 @@ describe("/user", () => {
   afterEach(async () => {
     await UserModel.deleteMany({});
   });
-  test("PUT/", (done) => {
-    request(app)
+  test("PUT/", async () => {
+    await request(app)
       .put("/user")
       .set("x-auth-token", authToken)
       .send({
@@ -36,18 +36,14 @@ describe("/user", () => {
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
+      .then((res) => {
         expect(res.body.user.firstName).toEqual("Anna");
-        return done();
       });
   });
 
-  test("PATCH/reset-password", (done) => {
+  test("PATCH/reset-password", async () => {
     const oldUserPassoword = user.password;
-    request(app)
+    await request(app)
       .patch("/user/reset-password")
       .set("x-auth-token", authToken)
       .send({
@@ -55,19 +51,15 @@ describe("/user", () => {
         newPassword: "54321",
       })
       .expect(200)
-      .end(async (err, res) => {
-        if (err) {
-          return done(err);
-        }
+      .then(async (res) => {
         await UserModel.findOne({ email: user.email }).then((res) => {
           expect(res.password).not.toEqual(oldUserPassoword);
         });
-        return done();
       });
   });
 
-  test("PATCH/change-email", (done) => {
-    request(app)
+  test("PATCH/change-email", async () => {
+    await request(app)
       .patch("/user/change-email")
       .set("x-auth-token", authToken)
       .send({
@@ -76,31 +68,27 @@ describe("/user", () => {
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
+      .then((res) => {
         expect(res.body.user.email).toEqual("newemail@email.com");
-        return done();
       });
   });
 
-  test("GET/send-activate-email", (done) => {
-    request(app)
+  test("GET/send-activate-email", async () => {
+    await request(app)
       .get("/user/send-activate-email")
       .set("x-auth-token", authToken)
       .send({
         link: "link1",
       })
-      .expect(200, done);
+      .expect(200);
   });
 
-  test("PATCH/activate-account", (done) => {
+  test("PATCH/activate-account", async () => {
     user.isVerified = false;
     user.generateReset();
-    user.save();
+    await user.save();
 
-    request(app)
+    await request(app)
       .patch("/user/activate-account")
       .set("x-auth-token", authToken)
       .send({
@@ -108,46 +96,38 @@ describe("/user", () => {
       })
       .expect("Content-Type", /json/)
       .expect(200)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
+      .then((res) => {
         expect(res.body.user.isVerified).toEqual(true);
-        return done();
       });
   });
 
-  test("GET/send-recover-email", (done) => {
-    request(app)
+  test("GET/send-recover-email", async () => {
+    await request(app)
       .get("/user/send-recover-email")
       .send({
-        email: "email@email.com",
+        email: "skakodube@gmail.com",
         link: "link1",
       })
-      .expect(200, done);
+      .expect(200);
   });
 
-  test("PATCH/recover-password", (done) => {
+  test("PATCH/recover-password", async () => {
     const oldUserPassoword = user.password;
 
     user.generateReset();
-    user.save();
+    await user.save();
 
-    request(app)
+    await request(app)
       .patch("/user/recover-password")
       .send({
         token: user.resetToken,
         password: "54321",
       })
       .expect(200)
-      .end(async (err, res) => {
-        if (err) {
-          return done(err);
-        }
+      .then(async (res) => {
         await UserModel.findOne({ email: user.email }).then((res) => {
           expect(res.password).not.toEqual(oldUserPassoword);
         });
-        return done();
       });
   });
 });
