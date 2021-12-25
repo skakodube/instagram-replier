@@ -35,11 +35,6 @@ const UserSchema = new mongoose.Schema(
     },
     OwnedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
     InvitedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
-    tempEmail: {
-      type: String,
-      minlength: 5,
-      maxlength: 50,
-    },
     resetToken: {
       type: String,
       required: false,

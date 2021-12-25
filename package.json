@@ -1,12 +1,12 @@
 {
   "name": "instagram-service",
   "version": "1.0.0",
-  "description": "Link to the api\r https://instagram-replier.herokuapp.com/status",
+  "description": "Link to the api https://instagram-replier.herokuapp.com/status",
   "main": "src/start.js",
   "scripts": {
     "start": "nodemon",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "test": "jest --group=unit --watchAll --verbose --detectOpenHandles --coverage"
+    "test": "jest --group=unit/services/bot --watchAll --verbose --detectOpenHandles --coverage"
   },
   "engines": {
     "node": "16.6.1"

@@ -66,7 +66,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Change-active endpoint with body: " + JSON.stringify(req.body)
+      "Calling Patch-active endpoint with body: " + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -74,6 +74,38 @@ router.patch(
       req.user,
       req.body.botId,
       req.body.isActive
+    );
+
+    res.send({ bot });
+  }
+);
+
+router.patch(
+  "/credentials",
+  [
+    celebrate({
+      body: {
+        botId: Joi.objectId().required(),
+        username: Joi.string().required(),
+        password: Joi.string().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    logger.debug(
+      "Calling Patch-credentials endpoint with body: " +
+        JSON.stringify(req.body)
+    );
+    const botService = new BotService();
+    const credentials = {
+      username: req.body.username,
+      password: req.body.password,
+    };
+    const bot = await botService.changeCredentials(
+      req.user,
+      req.body.botId,
+      credentials
     );
 
     res.send({ bot });
@@ -150,7 +182,7 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Add-Reply endpoint with body: " + JSON.stringify(req.body)
+      "Calling Create-Reply endpoint with body: " + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -180,7 +212,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Edit-Reply endpoint with body: " + JSON.stringify(req.body)
+      "Calling Patch-Reply endpoint with body: " + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -210,7 +242,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Change-reply-active endpoint with body: " +
+      "Calling Patch-reply-active endpoint with body: " +
         JSON.stringify(req.body)
     );
     const botService = new BotService();

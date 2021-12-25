@@ -177,6 +177,32 @@ describe("botService", () => {
       await botService.changeBotActive(user, bot._id, true);
     });
   });
+  describe("changeCredentials", () => {
+    const credentials = {
+      username: "username",
+      password: "password",
+    };
+    it("should return bot", async () => {
+      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+      mockingoose(BotModel).toReturn(bot, "findOneAndUpdate"); //db mock
+
+      const result = await botService.changeCredentials(
+        user,
+        bot._id,
+        credentials
+      );
+      expect(bot).toMatchObject(result);
+    });
+    runTestUserNotFound(async function () {
+      await botService.changeCredentials(user, bot._id, credentials);
+    });
+    runTestUserNotVerified(async function () {
+      await botService.changeCredentials(user, bot._id, credentials);
+    });
+    runTestBotNotFound(async function () {
+      await botService.changeCredentials(user, bot._id, credentials);
+    });
+  });
   describe("deleteBot", () => {
     it("should delete bot and it's replies", async () => {
       mockingoose(UserModel).toReturn(user, "findOne"); //db mock

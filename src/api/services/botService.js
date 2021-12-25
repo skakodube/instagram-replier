@@ -64,6 +64,7 @@ module.exports = class BotService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "isValid",
       "isActive",
       "replies",
       "defaultReply",
@@ -90,6 +91,61 @@ module.exports = class BotService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "isValid",
+      "isActive",
+      "replies",
+      "defaultReply",
+      "userCreated",
+      "createdAt",
+    ]);
+  }
+
+  async changeCredentials(user, botId, credentials) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new UserNotFoundError();
+    if (!userRecord.isVerified)
+      throw new PermissionError("🔥 User Is Not Verified.");
+
+    const botRecord = await BotModel.findOneAndUpdate(
+      { _id: botId },
+      { credentials },
+      { new: true }
+    );
+    if (!botRecord) throw new BotNotFoundError();
+
+    return _.pick(botRecord, [
+      "_id",
+      "instagramUrl",
+      "isValid",
+      "isActive",
+      "replies",
+      "defaultReply",
+      "userCreated",
+      "createdAt",
+    ]);
+  }
+
+  async changeBotActive(user, botId, isActive) {
+    const userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new UserNotFoundError();
+    if (!userRecord.isVerified)
+      throw new PermissionError("🔥 User Is Not Verified.");
+
+    const botRecord = await BotModel.findOneAndUpdate(
+      { _id: botId },
+      { isActive },
+      { new: true }
+    );
+    if (!botRecord) throw new BotNotFoundError();
+
+    return _.pick(botRecord, [
+      "_id",
+      "instagramUrl",
+      "isValid",
       "isActive",
       "replies",
       "defaultReply",
@@ -117,6 +173,7 @@ module.exports = class BotService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "isValid",
       "isActive",
       "replies",
       "defaultReply",
@@ -156,7 +213,9 @@ module.exports = class BotService {
         },
       ])
 
-      .select("_id userCreated instagramUrl isActive defaultReply createdAt");
+      .select(
+        "_id userCreated instagramUrl isValid isActive defaultReply createdAt"
+      );
     if (!botRecordAndReplies) throw new BotNotFoundError();
     //if no more, returs error
 
@@ -325,6 +384,7 @@ module.exports = class BotService {
     return _.pick(botRecord, [
       "_id",
       "instagramUrl",
+      "isValid",
       "isActive",
       "replies",
       "defaultReply",
@@ -367,6 +427,7 @@ module.exports = class BotService {
       "_id",
       "instagramUrl",
       "isActive",
+      "isValid",
       "replies",
       "defaultReply",
       "userCreated",
@@ -402,7 +463,7 @@ module.exports = class BotService {
 
     if (!botRecord)
       throw new BotNotFoundError(
-        "🔥 Bot Not Found Or User is Already Invited."
+        "🔥 Bot Not Found or User is Already Invited."
       );
 
     await UserModel.updateOne(
@@ -414,6 +475,7 @@ module.exports = class BotService {
       "_id",
       "instagramUrl",
       "isActive",
+      "isValid",
       "replies",
       "defaultReply",
       "userCreated",

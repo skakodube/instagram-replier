@@ -99,6 +99,19 @@ describe("/bot", () => {
       });
   });
 
+  test("PATCH/", async () => {
+    await request(app)
+      .patch("/bot/credentials")
+      .set("x-auth-token", authToken)
+      .send({
+        botId: bot._id,
+        username: "username",
+        password: "password",
+      })
+      .expect("Content-Type", /json/)
+      .expect(200);
+  });
+
   test("DELETE/", async () => {
     await request(app)
       .delete("/bot")

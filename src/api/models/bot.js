@@ -20,6 +20,11 @@ const BotSchema = new mongoose.Schema(
         required: true,
       },
     },
+    isValid: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
     isActive: {
       type: Boolean,
       default: false,
