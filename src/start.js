@@ -4,6 +4,8 @@ const config = require("./config");
 const logger = require("./api/loaders/logging");
 require("./api/loaders/prod")(app);
 
+console.log(process.env);
+
 app.listen(
   process.env.PORT || config.port,
   "0.0.0.0",

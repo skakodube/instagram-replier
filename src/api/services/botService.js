@@ -127,33 +127,6 @@ module.exports = class BotService {
     ]);
   }
 
-  async changeBotActive(user, botId, isActive) {
-    const userRecord = await UserModel.findOne({
-      email: user.email,
-    });
-    if (!userRecord) throw new UserNotFoundError();
-    if (!userRecord.isVerified)
-      throw new PermissionError("🔥 User Is Not Verified.");
-
-    const botRecord = await BotModel.findOneAndUpdate(
-      { _id: botId },
-      { isActive },
-      { new: true }
-    );
-    if (!botRecord) throw new BotNotFoundError();
-
-    return _.pick(botRecord, [
-      "_id",
-      "instagramUrl",
-      "isValid",
-      "isActive",
-      "replies",
-      "defaultReply",
-      "userCreated",
-      "createdAt",
-    ]);
-  }
-
   async deleteBot(user, botToDeleteId) {
     const userRecord = await UserModel.findOne({
       email: user.email,

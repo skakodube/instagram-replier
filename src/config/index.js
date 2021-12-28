@@ -1,10 +1,10 @@
 const dotenv = require("dotenv");
-const fs = require("fs");
+// const fs = require("fs");
 
-if (!fs.existsSync(".env")) {
-  fs.copyFile(".env.example", ".env.example", () => {});
-  fs.renameSync(".env.example", ".env");
-}
+// if (!fs.existsSync(".env")) {
+//   fs.copyFile(".env.example", ".env.example", () => {});
+//   fs.renameSync(".env.example", ".env");
+// }
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
