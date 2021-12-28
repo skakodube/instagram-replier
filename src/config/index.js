@@ -1,4 +1,5 @@
 const dotenv = require("dotenv");
+dotenv.config();
 // const fs = require("fs");
 
 // if (!fs.existsSync(".env")) {
@@ -8,7 +9,7 @@ const dotenv = require("dotenv");
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
-// const envFound = dotenv.config();
+// const envFound =
 // if (envFound.error) {
 //   throw new Error("⚠️  Couldn't find .env file  ⚠️");
 // }

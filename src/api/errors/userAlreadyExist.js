@@ -1,4 +1,4 @@
-const ApplicationError = require("./ApplicationError");
+const ApplicationError = require("./applicationError");
 
 module.exports = class UserAlreadyExistError extends ApplicationError {
   constructor(message, status, isOperational = true) {
