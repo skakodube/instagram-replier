@@ -6,6 +6,8 @@
 npm i
 ```
 
+rename .env.example to .env
+
 ## Run developer mode
 ```
 npm run dev
