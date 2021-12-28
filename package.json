@@ -4,7 +4,7 @@
   "description": "Link to the api https://instagram-replier.herokuapp.com/status",
   "main": "src/start.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "node",
     "dev": "cross-env NODE_ENV=development nodemon",
     "test": "jest --group=unit/services/bot --watchAll --verbose --detectOpenHandles --coverage"
   },
