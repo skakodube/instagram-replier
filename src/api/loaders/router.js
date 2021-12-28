@@ -23,7 +23,7 @@ module.exports = function (app) {
   app.use("/bot", bot);
 
   app.use(joiError());
-  // app.use(errorLogger);
-  // app.use(errorResponder);
-  // app.use(failSafeHandler);
+  app.use(errorLogger);
+  app.use(errorResponder);
+  app.use(failSafeHandler);
 };
