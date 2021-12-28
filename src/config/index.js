@@ -1,18 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
-// const fs = require("fs");
-
-// if (!fs.existsSync(".env")) {
-//   fs.copyFile(".env.example", ".env.example", () => {});
-//   fs.renameSync(".env.example", ".env");
-// }
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
-
-// const envFound =
-// if (envFound.error) {
-//   throw new Error("⚠️  Couldn't find .env file  ⚠️");
-// }
 
 module.exports = {
   port: process.env.PORT || 3000,
