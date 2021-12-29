@@ -4,23 +4,23 @@
  * @group unit/services/bot
  */
 
-const mongoose = require("mongoose");
-const mockingoose = require("mockingoose");
-const UserModel = require("../../../src/api/models/user");
-const BotModel = require("../../../src/api/models/bot");
-const ReplyModel = require("../../../src/api/models/reply");
-const UserNotFoundError = require("../../../src/api/errors/userNotFound");
-const BotNotFoundError = require("../../../src/api/errors/botNotFound");
-const BotAlreadyExistError = require("../../../src/api/errors/botAlreadyExist");
-const ReplyAlreadyExistError = require("../../../src/api/errors/replyAlreadyExist");
-const ReplyNotFoundError = require("../../../src/api/errors/replyNotFound");
-const PermissionError = require("../../../src/api/errors/permissionError");
-const BotService = require("../../../src/api/services/botService");
+const mongoose = require('mongoose');
+const mockingoose = require('mockingoose');
+const UserModel = require('../../../src/api/models/user');
+const BotModel = require('../../../src/api/models/bot');
+const ReplyModel = require('../../../src/api/models/reply');
+const UserNotFoundError = require('../../../src/api/errors/userNotFound');
+const BotNotFoundError = require('../../../src/api/errors/botNotFound');
+const BotAlreadyExistError = require('../../../src/api/errors/botAlreadyExist');
+const ReplyAlreadyExistError = require('../../../src/api/errors/replyAlreadyExist');
+const ReplyNotFoundError = require('../../../src/api/errors/replyNotFound');
+const PermissionError = require('../../../src/api/errors/permissionError');
+const BotService = require('../../../src/api/services/botService');
 
 let user, bot, reply, user2;
 async function runTestUserNotFound(callback) {
-  it("should return error if user is not registered", async () => {
-    mockingoose(UserModel).toReturn(undefined, "findOne"); //db mock
+  it('should return error if user is not registered', async () => {
+    mockingoose(UserModel).toReturn(undefined, 'findOne'); //db mock
 
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(UserNotFoundError);
@@ -28,18 +28,18 @@ async function runTestUserNotFound(callback) {
   });
 }
 async function runTestUserNotVerified(callback) {
-  it("should return error if user is not isVerified", async () => {
+  it('should return error if user is not isVerified', async () => {
     user.isVerified = false;
-    mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
 
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(PermissionError);
     });
   });
 }
-async function runTestBotNotFound(callback, strDbMock = "findOne") {
-  it("should return error if bot is not created", async () => {
-    mockingoose(UserModel).toReturn(user, "findOne");
+async function runTestBotNotFound(callback, strDbMock = 'findOne') {
+  it('should return error if bot is not created', async () => {
+    mockingoose(UserModel).toReturn(user, 'findOne');
     mockingoose(BotModel).toReturn(undefined, strDbMock); //db mock
 
     return await callback().catch((err) => {
@@ -48,9 +48,9 @@ async function runTestBotNotFound(callback, strDbMock = "findOne") {
   });
 }
 
-async function runTestBotAlreadyExist(callback, strDbMock = "findOne") {
-  it("should return error if url is used by other bot", async () => {
-    mockingoose(UserModel).toReturn(user, "findOne");
+async function runTestBotAlreadyExist(callback, strDbMock = 'findOne') {
+  it('should return error if url is used by other bot', async () => {
+    mockingoose(UserModel).toReturn(user, 'findOne');
     mockingoose(BotModel).toReturn(bot, strDbMock); //db mock
 
     return await callback().catch((err) => {
@@ -58,10 +58,10 @@ async function runTestBotAlreadyExist(callback, strDbMock = "findOne") {
     });
   });
 }
-async function runTestReplyNotFound(callback, strDbMock = "findOne") {
-  it("should return error if reply is not found", async () => {
-    mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-    mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
+async function runTestReplyNotFound(callback, strDbMock = 'findOne') {
+  it('should return error if reply is not found', async () => {
+    mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+    mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
     mockingoose(ReplyModel).toReturn(undefined, strDbMock); //db mock
 
     return await callback().catch((err) => {
@@ -70,39 +70,39 @@ async function runTestReplyNotFound(callback, strDbMock = "findOne") {
   });
 }
 
-describe("botService", () => {
+describe('botService', () => {
   const botService = new BotService();
   beforeEach(() => {
     user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "email@email.com",
-      firstName: "Mark",
-      lastName: "Watney",
-      password: "12345",
+      email: 'email@email.com',
+      firstName: 'Mark',
+      lastName: 'Watney',
+      password: '12345',
       isVerified: true,
     });
     bot = new BotModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      instagramUrl: "url",
+      instagramUrl: 'url',
       credentials: {
-        username: "abc",
-        password: "abc",
+        username: 'abc',
+        password: 'abc',
       },
       userCreated: user._id,
     });
     reply = new ReplyModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
       botBelongs: bot._id,
-      keywords: ["k1", "k2"],
-      answer: "answer",
+      keywords: ['k1', 'k2'],
+      answer: 'answer',
     });
     bot.replies = [reply];
     user2 = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: "skakodube@gmail.com",
-      firstName: "Anna",
-      lastName: "Stone",
-      password: "12345",
+      email: 'skakodube@gmail.com',
+      firstName: 'Anna',
+      lastName: 'Stone',
+      password: '12345',
       isVerified: true,
     });
   });
@@ -110,10 +110,10 @@ describe("botService", () => {
     mockingoose.resetAll();
     // UserModel.findById = null;
   });
-  describe("getBots", () => {
-    it("should return user and bots assigned", async () => {
+  describe('getBots', () => {
+    it('should return user and bots assigned', async () => {
       user.OwnedBots = [bot];
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
 
       const result = await botService.getBots(user);
       expect(result).toMatchObject(user);
@@ -125,18 +125,18 @@ describe("botService", () => {
       await botService.getBots(user);
     });
   });
-  describe("createBot", () => {
-    const instagramUrl = "url";
-    const credentials = { username: "abc", password: "abc" };
-    it("should return created bot", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(null, "findOne"); //db mock
+  describe('createBot', () => {
+    const instagramUrl = 'url';
+    const credentials = { username: 'abc', password: 'abc' };
+    it('should return created bot', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(null, 'findOne'); //db mock
 
       const result = await botService.createBot(user, {
         instagramUrl,
         credentials,
       });
-      expect(result).toHaveProperty("instagramUrl", "url");
+      expect(result).toHaveProperty('instagramUrl', 'url');
     });
     runTestUserNotFound(async function () {
       await botService.createBot(user, {
@@ -157,15 +157,15 @@ describe("botService", () => {
       });
     });
   });
-  describe("changeBotActive", () => {
-    it("should return changed bot", async () => {
+  describe('changeBotActive', () => {
+    it('should return changed bot', async () => {
       const isActive = true;
       bot.isActive = isActive;
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOneAndUpdate"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
 
       const result = await botService.changeBotActive(user, bot._id, isActive);
-      expect(result).toHaveProperty("isActive", isActive);
+      expect(result).toHaveProperty('isActive', isActive);
     });
     runTestUserNotFound(async function () {
       await botService.changeBotActive(user, bot._id, true);
@@ -177,14 +177,14 @@ describe("botService", () => {
       await botService.changeBotActive(user, bot._id, true);
     });
   });
-  describe("changeCredentials", () => {
+  describe('changeCredentials', () => {
     const credentials = {
-      username: "username",
-      password: "password",
+      username: 'username',
+      password: 'password',
     };
-    it("should return bot", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOneAndUpdate"); //db mock
+    it('should return bot', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
 
       const result = await botService.changeCredentials(
         user,
@@ -203,14 +203,14 @@ describe("botService", () => {
       await botService.changeCredentials(user, bot._id, credentials);
     });
   });
-  describe("deleteBot", () => {
+  describe('deleteBot', () => {
     it("should delete bot and it's replies", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOneAndDelete"); //db mock
-      mockingoose(ReplyModel).toReturn(reply, "deleteMany"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOneAndDelete'); //db mock
+      mockingoose(ReplyModel).toReturn(reply, 'deleteMany'); //db mock
 
       const result = await botService.deleteBot(user, bot._id);
-      expect(result).toHaveProperty("_id", bot._id);
+      expect(result).toHaveProperty('_id', bot._id);
     });
     runTestUserNotFound(async function () {
       await botService.deleteBot(user, bot._id);
@@ -220,36 +220,36 @@ describe("botService", () => {
     });
     runTestBotNotFound(async function () {
       await botService.deleteBot(user, bot._id);
-    }, "findOneAndDelete");
+    }, 'findOneAndDelete');
   });
-  describe("editDefaultReply", () => {
-    it("should return bot with newly edited default reply", async () => {
-      bot.defaultReply = "abc";
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOneAndUpdate"); //db mock
+  describe('editDefaultReply', () => {
+    it('should return bot with newly edited default reply', async () => {
+      bot.defaultReply = 'abc';
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
 
-      const result = await botService.editDefaultReply(user, bot._id, "abc");
-      expect(result).toHaveProperty("_id", bot._id);
-      expect(result).toHaveProperty("defaultReply", "abc");
+      const result = await botService.editDefaultReply(user, bot._id, 'abc');
+      expect(result).toHaveProperty('_id', bot._id);
+      expect(result).toHaveProperty('defaultReply', 'abc');
     });
     runTestUserNotFound(async function () {
-      await botService.editDefaultReply(user, bot._id, "abc");
+      await botService.editDefaultReply(user, bot._id, 'abc');
     });
     runTestUserNotVerified(async function () {
-      await botService.editDefaultReply(user, bot._id, "abc");
+      await botService.editDefaultReply(user, bot._id, 'abc');
     });
     runTestBotNotFound(async function () {
-      await botService.editDefaultReply(user, bot._id, "abc");
-    }, "findOneAndUpdate");
+      await botService.editDefaultReply(user, bot._id, 'abc');
+    }, 'findOneAndUpdate');
   });
-  describe("getRepliesByBot", () => {
-    it("should return bot with assigned replies", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(reply, "findOne"); //db mock
+  describe('getRepliesByBot', () => {
+    it('should return bot with assigned replies', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(reply, 'findOne'); //db mock
 
       const result = await botService.getRepliesByBot(user, bot._id, 1, 1);
-      expect(result).toHaveProperty("_id", bot._id);
+      expect(result).toHaveProperty('_id', bot._id);
       expect(result.replies).toMatchObject(expect.arrayContaining([reply]));
     });
     runTestUserNotFound(async function () {
@@ -260,59 +260,59 @@ describe("botService", () => {
     });
     runTestBotNotFound(async function () {
       await botService.getRepliesByBot(user, bot._id, 1, 1);
-    }, "findOneAndUpdate");
+    }, 'findOneAndUpdate');
   });
-  describe("addReply", () => {
-    it("should newly added reply", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(null, "findOne"); //db mock
+  describe('addReply', () => {
+    it('should newly added reply', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(null, 'findOne'); //db mock
 
-      const result = await botService.addReply(user, bot._id, ["a"], "b");
-      expect(result).toHaveProperty("keywords", ["a"]);
-      expect(result).toHaveProperty("answer", "b");
-      expect(result).toHaveProperty("botBelongs", bot._id);
+      const result = await botService.addReply(user, bot._id, ['a'], 'b');
+      expect(result).toHaveProperty('keywords', ['a']);
+      expect(result).toHaveProperty('answer', 'b');
+      expect(result).toHaveProperty('botBelongs', bot._id);
     });
     runTestUserNotFound(async function () {
-      await botService.addReply(user, bot._id, ["a"], "b");
+      await botService.addReply(user, bot._id, ['a'], 'b');
     });
     runTestUserNotVerified(async function () {
-      await botService.addReply(user, bot._id, ["a"], "b");
+      await botService.addReply(user, bot._id, ['a'], 'b');
     });
     runTestBotNotFound(async function () {
-      await botService.addReply(user, bot._id, ["a"], "b");
+      await botService.addReply(user, bot._id, ['a'], 'b');
     });
-    it("should return error if answer already exists within bot", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne");
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(reply, "findOne"); //db mock
+    it('should return error if answer already exists within bot', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne');
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(reply, 'findOne'); //db mock
 
       return await botService
-        .addReply(user, bot._id, ["a"], "b")
+        .addReply(user, bot._id, ['a'], 'b')
         .catch((err) => {
           expect(err).toBeInstanceOf(ReplyAlreadyExistError);
         });
     });
-    it("should return error if answer already exists within bot", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(new ReplyAlreadyExistError(), "findOne"); //db mock
+    it('should return error if answer already exists within bot', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(new ReplyAlreadyExistError(), 'findOne'); //db mock
 
       return await botService
-        .addReply(user, bot._id, ["a"], "b")
+        .addReply(user, bot._id, ['a'], 'b')
         .catch((err) => {
           expect(err).toBeInstanceOf(ReplyAlreadyExistError);
         });
     });
   });
-  describe("delete reply", () => {
-    it("should delete reply", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(reply, "findOneAndDelete"); //db mock
+  describe('delete reply', () => {
+    it('should delete reply', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(reply, 'findOneAndDelete'); //db mock
 
       const result = await botService.deleteReply(user, bot._id, reply._id);
-      expect(result).toHaveProperty("_id", reply._id);
+      expect(result).toHaveProperty('_id', reply._id);
     });
     runTestUserNotFound(async function () {
       await botService.deleteReply(user, bot._id, reply._id);
@@ -325,48 +325,48 @@ describe("botService", () => {
     });
     runTestReplyNotFound(async function () {
       await botService.deleteReply(user, bot._id, reply._id);
-    }, "findOneAndDelete");
+    }, 'findOneAndDelete');
   });
-  describe("edit reply", () => {
-    it("should return edited reply", async () => {
+  describe('edit reply', () => {
+    it('should return edited reply', async () => {
       let newReply = reply;
-      newReply.keywords = ["a"];
-      newReply.answer = "b";
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(newReply, "findOneAndUpdate"); //db mock
+      newReply.keywords = ['a'];
+      newReply.answer = 'b';
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(newReply, 'findOneAndUpdate'); //db mock
 
       const result = await botService.editReply(
         user,
         bot._id,
         reply._id,
-        ["a"],
-        "b"
+        ['a'],
+        'b'
       );
-      expect(result).toHaveProperty("_id", reply._id);
-      expect(result).toHaveProperty("keywords", ["a"]);
-      expect(result).toHaveProperty("answer", "b");
+      expect(result).toHaveProperty('_id', reply._id);
+      expect(result).toHaveProperty('keywords', ['a']);
+      expect(result).toHaveProperty('answer', 'b');
     });
     runTestUserNotFound(async function () {
-      await botService.editReply(user, bot._id, reply._id, ["a"], "b");
+      await botService.editReply(user, bot._id, reply._id, ['a'], 'b');
     });
     runTestUserNotVerified(async function () {
-      await botService.editReply(user, bot._id, reply._id, ["a"], "b");
+      await botService.editReply(user, bot._id, reply._id, ['a'], 'b');
     });
     runTestBotNotFound(async function () {
-      await botService.editReply(user, bot._id, reply._id, ["a"], "b");
+      await botService.editReply(user, bot._id, reply._id, ['a'], 'b');
     });
     runTestReplyNotFound(async function () {
-      await botService.editReply(user, bot._id, reply._id, ["a"], "b");
-    }, "findOneAndUpdate");
+      await botService.editReply(user, bot._id, reply._id, ['a'], 'b');
+    }, 'findOneAndUpdate');
   });
-  describe("changeReplyActive", () => {
-    it("should return changed reply", async () => {
+  describe('changeReplyActive', () => {
+    it('should return changed reply', async () => {
       const isActive = false;
       reply.isActive = isActive;
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
-      mockingoose(ReplyModel).toReturn(reply, "findOneAndUpdate"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
+      mockingoose(ReplyModel).toReturn(reply, 'findOneAndUpdate'); //db mock
 
       const result = await botService.changeReplyActive(
         user,
@@ -374,8 +374,8 @@ describe("botService", () => {
         reply._id,
         isActive
       );
-      expect(result).toHaveProperty("_id", reply._id);
-      expect(result).toHaveProperty("isActive", isActive);
+      expect(result).toHaveProperty('_id', reply._id);
+      expect(result).toHaveProperty('isActive', isActive);
     });
     runTestUserNotFound(async function () {
       await botService.changeReplyActive(user, bot._id, reply._id, false);
@@ -388,17 +388,17 @@ describe("botService", () => {
     });
     runTestReplyNotFound(async function () {
       await botService.changeReplyActive(user, bot._id, reply._id, false);
-    }, "findOneAndUpdate");
+    }, 'findOneAndUpdate');
   });
-  describe("inviteModerator", () => {
-    it("should return bot with newly user moderator", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOne"); //db mock
+  describe('inviteModerator', () => {
+    it('should return bot with newly user moderator', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
 
       const result = await botService.inviteModerator(user, user2, bot._id);
-      expect(result).toHaveProperty("_id", bot._id);
-      expect(result).toHaveProperty("userModerators", [user2._id]);
+      expect(result).toHaveProperty('_id', bot._id);
+      expect(result).toHaveProperty('userModerators', [user2._id]);
     });
     runTestUserNotFound(async function () {
       await botService.inviteModerator(user, user2, bot._id);
@@ -409,8 +409,8 @@ describe("botService", () => {
     runTestBotNotFound(async function () {
       await botService.inviteModerator(user, user2, bot._id);
     });
-    it("should return error if invited user is not registered", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    it('should return error if invited user is not registered', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(null);
 
       return await botService
@@ -419,9 +419,9 @@ describe("botService", () => {
           expect(err).toBeInstanceOf(UserNotFoundError);
         });
     });
-    it("should return error if invited user is not isVerified", async () => {
+    it('should return error if invited user is not isVerified', async () => {
       user2.isVerified = false;
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
 
       return await botService
@@ -430,10 +430,10 @@ describe("botService", () => {
           expect(err).toBeInstanceOf(PermissionError);
         });
     });
-    it("should return error if bot is not found", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    it('should return error if bot is not found', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
-      mockingoose(BotModel).toReturn(new BotNotFoundError(), "findOne"); //db mock
+      mockingoose(BotModel).toReturn(new BotNotFoundError(), 'findOne'); //db mock
 
       return await botService
         .inviteModerator(user, user2, bot._id)
@@ -442,18 +442,18 @@ describe("botService", () => {
         });
     });
   });
-  describe("removeModerator", () => {
-    it("should return bot with newly removed moderator", async () => {
+  describe('removeModerator', () => {
+    it('should return bot with newly removed moderator', async () => {
       bot.userModerators = [user2];
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
-      mockingoose(BotModel).toReturn(bot, "findOneAndUpdate"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
       bot.userModerators = [];
-      mockingoose(UserModel).toReturn(null, "updateOne"); //db mock
+      mockingoose(UserModel).toReturn(null, 'updateOne'); //db mock
 
       const result = await botService.removeModerator(user, user2, bot._id);
-      expect(result).toHaveProperty("_id", bot._id);
-      expect(result).toHaveProperty("userModerators", []);
+      expect(result).toHaveProperty('_id', bot._id);
+      expect(result).toHaveProperty('userModerators', []);
     });
     runTestUserNotFound(async function () {
       await botService.removeModerator(user, user2, bot._id);
@@ -461,8 +461,8 @@ describe("botService", () => {
     runTestUserNotVerified(async function () {
       await botService.removeModerator(user, user2, bot._id);
     });
-    it("should return error if invited user is not registered", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    it('should return error if invited user is not registered', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(null);
 
       return await botService
@@ -471,9 +471,9 @@ describe("botService", () => {
           expect(err).toBeInstanceOf(UserNotFoundError);
         });
     });
-    it("should return error if invited user is not isVerified", async () => {
+    it('should return error if invited user is not isVerified', async () => {
       user2.isVerified = false;
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
 
       return await botService
@@ -482,10 +482,10 @@ describe("botService", () => {
           expect(err).toBeInstanceOf(PermissionError);
         });
     });
-    it("should return error if bot is not found", async () => {
-      mockingoose(UserModel).toReturn(user, "findOne"); //db mock
+    it('should return error if bot is not found', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
-      mockingoose(BotModel).toReturn(new BotNotFoundError(), "findOne"); //db mock
+      mockingoose(BotModel).toReturn(new BotNotFoundError(), 'findOne'); //db mock
 
       return await botService
         .removeModerator(user, user2, bot._id)

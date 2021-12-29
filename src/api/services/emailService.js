@@ -1,8 +1,8 @@
-const sgMail = require("@sendgrid/mail");
-const UserModel = require("../models/user");
-const EmailError = require("../errors/emailError");
-const UserNotFoundError = require("../errors/userNotFound");
-const config = require("../../config");
+const sgMail = require('@sendgrid/mail');
+const UserModel = require('../models/user');
+const EmailError = require('../errors/emailError');
+const UserNotFoundError = require('../errors/userNotFound');
+const config = require('../../config');
 
 sgMail.setApiKey(config.emails.apiKey);
 const verificationTemplate = config.emails.verificationTemplate;
@@ -29,7 +29,7 @@ module.exports = class EmailService {
         user_name: userRecord.firstName,
         Weblink:
           //confirmLink
-          "https://instagram.replier.com/account/confirm/" +
+          'https://instagram.replier.com/account/confirm/' +
           userRecord.resetToken,
       },
       template_id: verificationTemplate,
@@ -57,7 +57,7 @@ module.exports = class EmailService {
       dynamic_template_data: {
         Weblink:
           //confirmLink
-          "https://instagram.replier.com/account/recover/" +
+          'https://instagram.replier.com/account/recover/' +
           userRecord.resetToken,
       },
       template_id: resetPasswordTemplate,

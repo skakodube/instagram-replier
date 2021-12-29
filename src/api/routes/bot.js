@@ -1,18 +1,18 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require("celebrate");
-Joi.objectId = require("joi-objectid")(Joi);
-const BotService = require("../services/botService");
-const auth = require("../middleware/auth");
-const logger = require("../loaders/logging");
+const { celebrate, Joi } = require('celebrate');
+Joi.objectId = require('joi-objectid')(Joi);
+const BotService = require('../services/botService');
+const auth = require('../middleware/auth');
+const logger = require('../loaders/logging');
 
 //TODO:
 //add users searcher by email for invites
 //SEND DATA OR OK?
 //VERIFICATION MUST BE MIDDLEWARE
 
-router.get("/", [auth], async (req, res) => {
-  logger.debug("Calling Get-Bots endpoint");
+router.get('/', [auth], async (req, res) => {
+  logger.debug('Calling Get-Bots endpoint');
   const botService = new BotService();
 
   const userAndBots = await botService.getBots(req.user);
@@ -21,7 +21,7 @@ router.get("/", [auth], async (req, res) => {
 });
 
 router.post(
-  "/",
+  '/',
   [
     celebrate({
       body: {
@@ -34,7 +34,7 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Create-Bot endpoint with body: " + JSON.stringify(req.body)
+      'Calling Create-Bot endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -54,7 +54,7 @@ router.post(
 );
 
 router.patch(
-  "/isActive",
+  '/isActive',
   [
     celebrate({
       body: {
@@ -66,7 +66,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Patch-active endpoint with body: " + JSON.stringify(req.body)
+      'Calling Patch-active endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -81,7 +81,7 @@ router.patch(
 );
 
 router.patch(
-  "/credentials",
+  '/credentials',
   [
     celebrate({
       body: {
@@ -94,7 +94,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Patch-credentials endpoint with body: " +
+      'Calling Patch-credentials endpoint with body: ' +
         JSON.stringify(req.body)
     );
     const botService = new BotService();
@@ -113,7 +113,7 @@ router.patch(
 );
 
 router.delete(
-  "/",
+  '/',
   [
     celebrate({
       body: {
@@ -124,7 +124,7 @@ router.delete(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Delete-Bot endpoint with body: " + JSON.stringify(req.body)
+      'Calling Delete-Bot endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -140,7 +140,7 @@ router.get(
   //TODO:
   // PUT PAGENUM AND PAGESIZE IN URL
   //get or post?
-  "/reply",
+  '/reply',
   [
     celebrate({
       body: {
@@ -153,7 +153,7 @@ router.get(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Get-Replies endpoint with body: " + JSON.stringify(req.body)
+      'Calling Get-Replies endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -169,7 +169,7 @@ router.get(
 );
 
 router.post(
-  "/reply",
+  '/reply',
   [
     celebrate({
       body: {
@@ -182,7 +182,7 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Create-Reply endpoint with body: " + JSON.stringify(req.body)
+      'Calling Create-Reply endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -198,7 +198,7 @@ router.post(
 );
 
 router.patch(
-  "/reply",
+  '/reply',
   [
     celebrate({
       body: {
@@ -212,7 +212,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Patch-Reply endpoint with body: " + JSON.stringify(req.body)
+      'Calling Patch-Reply endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -229,7 +229,7 @@ router.patch(
 );
 
 router.patch(
-  "/reply/isActive",
+  '/reply/isActive',
   [
     celebrate({
       body: {
@@ -242,7 +242,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Patch-reply-active endpoint with body: " +
+      'Calling Patch-reply-active endpoint with body: ' +
         JSON.stringify(req.body)
     );
     const botService = new BotService();
@@ -259,7 +259,7 @@ router.patch(
 );
 
 router.delete(
-  "/reply",
+  '/reply',
   [
     celebrate({
       body: {
@@ -271,7 +271,7 @@ router.delete(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Delete-Reply endpoint with body: " + JSON.stringify(req.body)
+      'Calling Delete-Reply endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -286,7 +286,7 @@ router.delete(
 );
 
 router.put(
-  "/default-reply",
+  '/default-reply',
   [
     celebrate({
       body: {
@@ -298,7 +298,7 @@ router.put(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Delete-Reply endpoint with body: " + JSON.stringify(req.body)
+      'Calling Delete-Reply endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -315,7 +315,7 @@ router.put(
 //=========================Moderators=========================//
 
 router.patch(
-  "/invite-moderator",
+  '/invite-moderator',
   [
     celebrate({
       body: {
@@ -327,7 +327,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Invite-Moderator endpoint with body: " + JSON.stringify(req.body)
+      'Calling Invite-Moderator endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
@@ -342,7 +342,7 @@ router.patch(
 );
 
 router.patch(
-  "/remove-moderator",
+  '/remove-moderator',
   [
     celebrate({
       body: {
@@ -354,7 +354,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Remove-Moderator endpoint with body: " + JSON.stringify(req.body)
+      'Calling Remove-Moderator endpoint with body: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 

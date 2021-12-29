@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const config = require("../../config");
+const jwt = require('jsonwebtoken');
+const config = require('../../config');
 
 module.exports.generateJWT = function (user) {
   //some more parameters?
@@ -11,6 +11,6 @@ module.exports.generateJWT = function (user) {
   };
 
   return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: "60 days",
+    expiresIn: '60 days',
   });
 };

@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const UserModel = require("./user");
+const mongoose = require('mongoose');
+const UserModel = require('./user');
 //
 const BotSchema = new mongoose.Schema(
   {
     userCreated: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     profilePicture: String,
@@ -30,18 +30,18 @@ const BotSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
-    replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reply" }],
+    replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reply' }],
     defaultReply: {
       type: String,
-      default: "",
+      default: '',
     },
-    userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    sessionCookies: { type: String, default: "", trim: true },
+    userModerators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    sessionCookies: { type: String, default: '', trim: true },
   },
   { timestamps: true }
 );
 
-BotSchema.pre("findOneAndDelete", async function (next) {
+BotSchema.pre('findOneAndDelete', async function (next) {
   const docToDelete = await this.model.findOne(this.getQuery());
   if (!docToDelete) return;
   await UserModel.findOneAndUpdate(
@@ -65,4 +65,4 @@ BotSchema.pre("findOneAndDelete", async function (next) {
   // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec(); *circular depedency error*
 });
 
-module.exports = mongoose.model("Bot", BotSchema);
+module.exports = mongoose.model('Bot', BotSchema);

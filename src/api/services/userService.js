@@ -1,8 +1,8 @@
-const UserModel = require("../models/user");
-const _ = require("lodash");
-const UserAlreadyExistError = require("../errors/userAlreadyExist");
-const UserNotFoundError = require("../errors/userNotFound");
-const InvalidTokenError = require("../errors/invalidToken");
+const UserModel = require('../models/user');
+const _ = require('lodash');
+const UserAlreadyExistError = require('../errors/userAlreadyExist');
+const UserNotFoundError = require('../errors/userNotFound');
+const InvalidTokenError = require('../errors/invalidToken');
 
 module.exports = class UserService {
   async login(user) {
@@ -10,19 +10,19 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     const isValidPassword = await userRecord.comparePassword(user.password);
     if (!isValidPassword)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "isVerified",
-      "isAdmin",
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
     ]);
   }
 
@@ -33,19 +33,19 @@ module.exports = class UserService {
     if (userRecord) throw new UserAlreadyExistError();
 
     userRecord = new UserModel(
-      _.pick(user, ["firstName", "lastName", "email", "password", "isAdmin"])
+      _.pick(user, ['firstName', 'lastName', 'email', 'password', 'isAdmin'])
     );
     userRecord.password = user.password;
 
     await userRecord.save();
 
     return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "isVerified",
-      "isAdmin",
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
     ]);
   }
 
@@ -77,15 +77,15 @@ module.exports = class UserService {
       { new: true }
     );
     if (!userRecord)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "isVerified",
-      "isAdmin",
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
     ]);
   }
 
@@ -105,12 +105,12 @@ module.exports = class UserService {
     await userRecord.save();
 
     return _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "isVerified",
-      "isAdmin",
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
     ]);
   }
 
@@ -119,11 +119,11 @@ module.exports = class UserService {
       email: user.email,
     });
     if (!userRecord)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     const isValidPassword = await userRecord.comparePassword(oldPassword);
     if (!isValidPassword)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     userRecord.password = newPassword;
 
@@ -135,23 +135,23 @@ module.exports = class UserService {
   async changeEmail(user, newEmail, password) {
     //could do in one method with OR operator
     if (user.email == newEmail)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     let userRecord = await UserModel.findOne({
       email: newEmail,
     });
     if (userRecord)
-      throw new UserAlreadyExistError("🔥 User With This Email Already Exist.");
+      throw new UserAlreadyExistError('🔥 User With This Email Already Exist.');
 
     userRecord = await UserModel.findOne({
       email: user.email,
     });
     if (!userRecord)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     const isValidPassword = await userRecord.comparePassword(password);
     if (!isValidPassword)
-      throw new UserNotFoundError("🔥 Invalid Email Or Password.");
+      throw new UserNotFoundError('🔥 Invalid Email Or Password.');
 
     const oldEmail = user.email;
     userRecord.email = newEmail;
@@ -159,12 +159,12 @@ module.exports = class UserService {
     await userRecord.save();
 
     user = _.pick(userRecord, [
-      "_id",
-      "firstName",
-      "lastName",
-      "email",
-      "isVerified",
-      "isAdmin",
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
     ]);
 
     return { user, oldEmail };

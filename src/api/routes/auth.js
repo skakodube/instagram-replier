@@ -1,15 +1,15 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require("celebrate");
-Joi.objectId = require("joi-objectid")(Joi);
-const passwordComplexity = require("joi-password-complexity").default;
-const UserService = require("../services/userService");
-const EmailService = require("../services/emailService");
-const jwt = require("../helpers/jwt");
-const logger = require("../loaders/logging");
+const { celebrate, Joi } = require('celebrate');
+Joi.objectId = require('joi-objectid')(Joi);
+const passwordComplexity = require('joi-password-complexity').default;
+const UserService = require('../services/userService');
+const EmailService = require('../services/emailService');
+const jwt = require('../helpers/jwt');
+const logger = require('../loaders/logging');
 
 router.post(
-  "/login",
+  '/login',
   [
     celebrate({
       body: {
@@ -20,17 +20,17 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Log-in endpoint with body: " + JSON.stringify(req.body)
+      'Calling Log-in endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const user = await userService.login(req.body);
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+    res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );
 
 router.post(
-  "/signup",
+  '/signup',
   [
     celebrate({
       body: {
@@ -53,13 +53,13 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Log-in endpoint with body: " + JSON.stringify(req.body)
+      'Calling Log-in endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const user = await userService.signup(req.body);
 
     logger.silly(
-      "Sending verification email : " + JSON.stringify(req.body.email)
+      'Sending verification email : ' + JSON.stringify(req.body.email)
     );
     const emailService = new EmailService();
     await emailService.sendVerificationEmail(
@@ -67,7 +67,7 @@ router.post(
       req.body.verificationLink
     );
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+    res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );
 

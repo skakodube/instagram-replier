@@ -1,14 +1,14 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require("celebrate");
-Joi.objectId = require("joi-objectid")(Joi);
-const UserService = require("../services/userService");
-const passwordComplexity = require("joi-password-complexity").default;
-const EmailService = require("../services/emailService");
-const auth = require("../middleware/auth");
-const jwt = require("../helpers/jwt");
-const _ = require("lodash");
-const logger = require("../loaders/logging");
+const { celebrate, Joi } = require('celebrate');
+Joi.objectId = require('joi-objectid')(Joi);
+const UserService = require('../services/userService');
+const passwordComplexity = require('joi-password-complexity').default;
+const EmailService = require('../services/emailService');
+const auth = require('../middleware/auth');
+const jwt = require('../helpers/jwt');
+const _ = require('lodash');
+const logger = require('../loaders/logging');
 
 //TODO: REMOVE AWAIT ON EMAILING
 
@@ -23,7 +23,7 @@ const logger = require("../loaders/logging");
 //refactor to change single chosen parameter?
 //
 router.put(
-  "/",
+  '/',
   [
     celebrate({
       body: {
@@ -35,7 +35,7 @@ router.put(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Edit-User endpoint with body: " + JSON.stringify(req.body)
+      'Calling Edit-User endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 
@@ -45,12 +45,12 @@ router.put(
       req.body.lastName
     );
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+    res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );
 
 router.patch(
-  "/reset-password",
+  '/reset-password',
   [
     celebrate({
       body: {
@@ -78,7 +78,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Reset-Password endpoint with body: " + JSON.stringify(req.body)
+      'Calling Reset-Password endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     await userService.resetPasswordByPassword(
@@ -86,12 +86,12 @@ router.patch(
       req.body.oldPassword,
       req.body.newPassword
     );
-    res.send("OK");
+    res.send('OK');
   }
 );
 
 router.patch(
-  "/change-email",
+  '/change-email',
   [
     celebrate({
       body: {
@@ -111,7 +111,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Change-Email endpoint with body: " + JSON.stringify(req.body)
+      'Calling Change-Email endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const { user, oldEmail } = await userService.changeEmail(
@@ -119,17 +119,17 @@ router.patch(
       req.body.newEmail,
       req.body.password
     );
-    logger.silly("Sending notice email to : " + JSON.stringify(oldEmail));
+    logger.silly('Sending notice email to : ' + JSON.stringify(oldEmail));
     const emailService = new EmailService();
     await emailService.sendChangeNoticeEmail(user.email, oldEmail);
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+    res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );
 
 //=========================AccountVerification=========================//
 router.get(
-  "/send-activate-email",
+  '/send-activate-email',
   [
     celebrate({
       body: {
@@ -140,21 +140,21 @@ router.get(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Send-Activate-Email endpoint with body: " +
+      'Calling Send-Activate-Email endpoint with body: ' +
         JSON.stringify(req.body)
     );
     const emailService = new EmailService();
     logger.silly(
-      "Sending verification email to: " + JSON.stringify(req.user.email)
+      'Sending verification email to: ' + JSON.stringify(req.user.email)
     );
     await emailService.sendVerificationEmail(req.user.email, req.body.link);
 
-    res.send("OK");
+    res.send('OK');
   }
 );
 
 router.patch(
-  "/activate-account",
+  '/activate-account',
   [
     celebrate({
       body: {
@@ -165,20 +165,20 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Activate-Account endpoint with body: " + JSON.stringify(req.body)
+      'Calling Activate-Account endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 
     const user = await userService.activateAccount(req.user, req.body.token);
 
-    res.header("x-auth-token", jwt.generateJWT(user)).send({ user });
+    res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );
 
 //=========================RecoverPassword=========================//
 
 router.get(
-  "/send-recover-email",
+  '/send-recover-email',
   [
     celebrate({
       body: {
@@ -189,21 +189,21 @@ router.get(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Send-Recover-Email endpoint with body: " +
+      'Calling Send-Recover-Email endpoint with body: ' +
         JSON.stringify(req.body)
     );
     logger.silly(
-      "Sending recover passwor email to: " + JSON.stringify(req.body.email)
+      'Sending recover passwor email to: ' + JSON.stringify(req.body.email)
     );
     const emailService = new EmailService();
     await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
 
-    res.send("OK");
+    res.send('OK');
   }
 );
 
 router.patch(
-  "/recover-password",
+  '/recover-password',
   [
     celebrate({
       body: {
@@ -222,7 +222,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      "Calling Recover-Password endpoint with body: " + JSON.stringify(req.body)
+      'Calling Recover-Password endpoint with body: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 
@@ -231,7 +231,7 @@ router.patch(
       req.body.password
     );
 
-    res.send("OK");
+    res.send('OK');
   }
 );
 

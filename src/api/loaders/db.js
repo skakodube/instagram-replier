@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-const logger = require("./logging");
-const config = require("../../config");
+const mongoose = require('mongoose');
+const logger = require('./logging');
+const config = require('../../config');
 let databaseURL = config.databaseURL;
 
 //if test is running use test db
-if (typeof jest !== "undefined") {
+if (typeof jest !== 'undefined') {
   databaseURL = config.databaseTestURL;
 }
 
@@ -19,7 +19,7 @@ module.exports = async function () {
     logger.error(`⚠️ Failed connect to MongoDB: ${error} ⚠️`);
   }
 
-  mongoose.connection.on("error", (error) => {
+  mongoose.connection.on('error', (error) => {
     logger.error(`⚠️ Unexpected MongoDB Error: ${error} ⚠️`);
   });
 };

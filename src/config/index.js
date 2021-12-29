@@ -1,7 +1,7 @@
-const dotenv = require("dotenv");
+const dotenv = require('dotenv');
 dotenv.config();
 
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
   port: process.env.PORT || 3000,
@@ -12,7 +12,7 @@ module.exports = {
   jwtSecret: process.env.JWT_SECRET,
 
   logs: {
-    level: process.env.LOG_LEVEL || "silly",
+    level: process.env.LOG_LEVEL || 'silly',
   },
 
   emails: {
@@ -23,5 +23,5 @@ module.exports = {
     noticeTemplate: process.env.SENDGRID_NOTICE_TEMPLATE,
   },
 
-  mode: process.env.NODE_ENV || "development",
+  mode: process.env.NODE_ENV || 'development',
 };

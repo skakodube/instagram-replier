@@ -1,4 +1,4 @@
-const logger = require("../loaders/logging");
+const logger = require('../loaders/logging');
 
 module.exports = function (error, req, res, next) {
   if (error.isOperational) {

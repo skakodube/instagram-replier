@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -33,8 +33,8 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    OwnedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
-    InvitedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
+    OwnedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bot' }],
+    InvitedBots: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bot' }],
     resetToken: {
       type: String,
       required: false,
@@ -47,10 +47,10 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.pre("save", function (next) {
+UserSchema.pre('save', function (next) {
   const user = this;
 
-  if (!user.isModified("password")) return next();
+  if (!user.isModified('password')) return next();
 
   bcrypt.genSalt(10, function (err, salt) {
     if (err) return next(err);
@@ -69,8 +69,8 @@ UserSchema.methods.comparePassword = async function (password) {
 };
 
 UserSchema.methods.generateReset = function () {
-  this.resetToken = crypto.randomBytes(20).toString("hex");
+  this.resetToken = crypto.randomBytes(20).toString('hex');
   this.resetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; //expires in a week
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model('User', UserSchema);
