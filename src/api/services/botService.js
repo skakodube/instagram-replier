@@ -100,7 +100,7 @@ module.exports = class BotService {
     ]);
   }
 
-  async changeCredentials(user, botId, credentials) {
+  async changeCredentials(user, botId, credentials, instagramUrl) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -110,7 +110,7 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOneAndUpdate(
       { _id: botId },
-      { credentials },
+      { credentials, instagramUrl },
       { new: true }
     );
     if (!botRecord) throw new BotNotFoundError();
@@ -131,6 +131,7 @@ module.exports = class BotService {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
+    console.log(user, botToDeleteId);
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');

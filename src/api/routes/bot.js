@@ -25,7 +25,6 @@ router.post(
   [
     celebrate({
       body: {
-        instagramUrl: Joi.string().required(),
         username: Joi.string().required(),
         password: Joi.string().required(),
       },
@@ -38,7 +37,7 @@ router.post(
     );
     const botService = new BotService();
 
-    const instagramUrl = req.body.instagramUrl;
+    const instagramUrl = `https://www.instagram.com/${req.body.username}`;
     const credentials = {
       username: req.body.username,
       password: req.body.password,
@@ -102,10 +101,12 @@ router.patch(
       username: req.body.username,
       password: req.body.password,
     };
+    const instagramUrl = `https://www.instagram.com/${req.body.username}`;
     const bot = await botService.changeCredentials(
       req.user,
       req.body.botId,
-      credentials
+      credentials,
+      instagramUrl
     );
 
     res.send({ bot });
@@ -145,8 +146,8 @@ router.get(
     celebrate({
       body: {
         botId: Joi.objectId().required(),
-        pageNum: Joi.number().min(1).required(),
-        pageSize: Joi.number().min(1).required(),
+        pageNum: Joi.number().min(1),
+        pageSize: Joi.number().min(1),
       },
     }),
     auth,
@@ -159,9 +160,9 @@ router.get(
 
     const botAndReplies = await botService.getRepliesByBot(
       req.user,
-      req.body.botId,
-      req.body.pageNum,
-      req.body.pageSize
+      req.query.botId,
+      req.query.pageNum,
+      req.query.pageSize
     );
 
     res.send({ bot: botAndReplies });
