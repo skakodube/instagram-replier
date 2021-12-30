@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, Segments } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 const UserService = require('../services/userService');
 const passwordComplexity = require('joi-password-complexity').default;
@@ -12,21 +12,11 @@ const logger = require('../loaders/logging');
 
 //TODO: REMOVE AWAIT ON EMAILING
 
-// router.get("/me", [auth], async (req, res) => {
-//   const userService = new UserService();
-
-//   const userRecord = await userService.getMe(req.user);
-
-//   res.header("x-auth-token", jwt.generateJWT(userRecord)).send(userRecord);
-// });
-
-//refactor to change single chosen parameter?
-//
 router.put(
   '/',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         firstName: Joi.string().required().max(50).min(2),
         lastName: Joi.string().required().max(50).min(2),
       },
@@ -35,7 +25,7 @@ router.put(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Edit-User endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Edit-User endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 
@@ -53,7 +43,7 @@ router.patch(
   '/reset-password',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         oldPassword: passwordComplexity({
           min: 5,
           max: 255,
@@ -78,7 +68,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Reset-Password endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Reset-Password endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     await userService.resetPasswordByPassword(
@@ -94,7 +84,7 @@ router.patch(
   '/change-email',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         password: passwordComplexity({
           min: 5,
           max: 255,
@@ -111,7 +101,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Change-Email endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Change-Email endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const { user, oldEmail } = await userService.changeEmail(
@@ -132,7 +122,7 @@ router.get(
   '/send-activate-email',
   [
     celebrate({
-      body: {
+      [Segments.QUERY]: {
         link: Joi.string().required().min(1).max(255),
       },
     }),
@@ -140,14 +130,14 @@ router.get(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Send-Activate-Email endpoint with body: ' +
-        JSON.stringify(req.body)
+      'Calling Send-Activate-Email endpoint with data: ' +
+        JSON.stringify(req.query)
     );
     const emailService = new EmailService();
     logger.silly(
       'Sending verification email to: ' + JSON.stringify(req.user.email)
     );
-    await emailService.sendVerificationEmail(req.user.email, req.body.link);
+    await emailService.sendVerificationEmail(req.user.email, req.query.link);
 
     res.send('OK');
   }
@@ -157,7 +147,7 @@ router.patch(
   '/activate-account',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         token: Joi.string().required(),
       },
     }),
@@ -165,7 +155,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Activate-Account endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Activate-Account endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 
@@ -181,7 +171,7 @@ router.get(
   '/send-recover-email',
   [
     celebrate({
-      body: {
+      [Segments.QUERY]: {
         email: Joi.string().required().min(5).max(255).email(),
         link: Joi.string().required().min(1).max(255),
       },
@@ -189,14 +179,17 @@ router.get(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Send-Recover-Email endpoint with body: ' +
-        JSON.stringify(req.body)
+      'Calling Send-Recover-Email endpoint with data: ' +
+        JSON.stringify(req.query)
     );
     logger.silly(
-      'Sending recover passwor email to: ' + JSON.stringify(req.body.email)
+      'Sending recover passwor email to: ' + JSON.stringify(req.query.email)
     );
     const emailService = new EmailService();
-    await emailService.sendRecoverPasswordEmail(req.body.email, req.body.link);
+    await emailService.sendRecoverPasswordEmail(
+      req.query.email,
+      req.query.link
+    );
 
     res.send('OK');
   }
@@ -206,7 +199,7 @@ router.patch(
   '/recover-password',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         token: Joi.string().required(),
         password: passwordComplexity({
           min: 5,
@@ -222,7 +215,7 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Recover-Password endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Recover-Password endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
 

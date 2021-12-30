@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, Segments } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 const passwordComplexity = require('joi-password-complexity').default;
 const UserService = require('../services/userService');
@@ -12,7 +12,7 @@ router.post(
   '/login',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         email: Joi.string().required().min(5).max(255).email(),
         password: Joi.string().required().min(5).max(255),
       },
@@ -20,7 +20,7 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Log-in endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Log-in endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const user = await userService.login(req.body);
@@ -33,7 +33,7 @@ router.post(
   '/signup',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         firstName: Joi.string().required().max(50).min(2),
         lastName: Joi.string().required().max(50).min(2),
         email: Joi.string().required().min(5).max(255).email(),
@@ -46,14 +46,13 @@ router.post(
           symbol: 0,
           requirementCount: 2,
         }).required(),
-        isAdmin: Joi.boolean(),
         verificationLink: Joi.string().required().min(1).max(255),
       },
     }),
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Log-in endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Log-in endpoint with data: ' + JSON.stringify(req.body)
     );
     const userService = new UserService();
     const user = await userService.signup(req.body);

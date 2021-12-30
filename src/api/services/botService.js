@@ -19,14 +19,15 @@ module.exports = class BotService {
         {
           path: 'OwnedBots',
           model: 'Bot',
-          select: '_id instagramUrl isActive profilePicture dateCreated',
+          select:
+            '_id credentials.username isActive profilePicture dateCreated',
         },
       ])
       .populate([
         {
           path: 'InvitedBots',
           model: 'Bot',
-          InvitedBots: '_id instagramUrl isActive dateCreated',
+          InvitedBots: '_id isActive dateCreated',
         },
       ])
       .select('email firstName lastName isVerified isAdmin dateRegistered');
@@ -37,7 +38,7 @@ module.exports = class BotService {
     return userRecordAndBots;
   }
 
-  async createBot(user, { instagramUrl, credentials }) {
+  async createBot(user, credentials) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -46,13 +47,13 @@ module.exports = class BotService {
       throw new PermissionError('🔥 User Is Not Verified.');
 
     let botRecord = await BotModel.findOne({
-      instagramUrl: instagramUrl,
+      username: credentials.username,
     });
-    if (botRecord) throw new BotAlreadyExistError('🔥 Bot URL Already Exist.');
+    if (botRecord)
+      throw new BotAlreadyExistError('🔥 Bot Username Already Exist.');
 
     botRecord = new BotModel({
       userCreated: userRecord._id,
-      instagramUrl,
       credentials,
     });
 
@@ -63,7 +64,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isValid',
       'isActive',
       'replies',
@@ -90,7 +91,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isValid',
       'isActive',
       'replies',
@@ -100,7 +101,7 @@ module.exports = class BotService {
     ]);
   }
 
-  async changeCredentials(user, botId, credentials, instagramUrl) {
+  async changeCredentials(user, botId, credentials) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -110,14 +111,14 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOneAndUpdate(
       { _id: botId },
-      { credentials, instagramUrl },
+      { credentials },
       { new: true }
     );
     if (!botRecord) throw new BotNotFoundError();
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isValid',
       'isActive',
       'replies',
@@ -131,7 +132,6 @@ module.exports = class BotService {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
-    console.log(user, botToDeleteId);
     if (!userRecord) throw new UserNotFoundError();
     if (!userRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
@@ -146,7 +146,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isValid',
       'isActive',
       'replies',
@@ -188,7 +188,7 @@ module.exports = class BotService {
       ])
 
       .select(
-        '_id userCreated instagramUrl isValid isActive defaultReply createdAt'
+        '_id credentials.username isValid isActive defaultReply userCreated createdAt'
       );
     if (!botRecordAndReplies) throw new BotNotFoundError();
     //if no more, returs error
@@ -357,7 +357,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isValid',
       'isActive',
       'replies',
@@ -399,7 +399,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isActive',
       'isValid',
       'replies',
@@ -447,7 +447,7 @@ module.exports = class BotService {
 
     return _.pick(botRecord, [
       '_id',
-      'instagramUrl',
+      'credentials.username',
       'isActive',
       'isValid',
       'replies',

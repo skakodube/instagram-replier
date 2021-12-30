@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const UserModel = require('./user');
-//
+//TODO
+//instagramUrl unique
 const BotSchema = new mongoose.Schema(
   {
     userCreated: {
@@ -9,7 +10,6 @@ const BotSchema = new mongoose.Schema(
       required: true,
     },
     profilePicture: String,
-    instagramUrl: String,
     credentials: {
       username: {
         type: String,

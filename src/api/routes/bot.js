@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, Segments } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 const BotService = require('../services/botService');
 const auth = require('../middleware/auth');
@@ -24,7 +24,7 @@ router.post(
   '/',
   [
     celebrate({
-      body: {
+      [Segments.BODY]: {
         username: Joi.string().required(),
         password: Joi.string().required(),
       },
@@ -33,31 +33,29 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Create-Bot endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Create-Bot endpoint with data: ' + JSON.stringify(req.body)
     );
     const botService = new BotService();
 
-    const instagramUrl = `https://www.instagram.com/${req.body.username}`;
     const credentials = {
       username: req.body.username,
       password: req.body.password,
     };
 
-    const bot = await botService.createBot(req.user, {
-      instagramUrl,
-      credentials,
-    });
+    const bot = await botService.createBot(req.user, credentials);
 
     res.send({ bot });
   }
 );
 
 router.patch(
-  '/isActive',
+  '/:botId/isActive',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         isActive: Joi.boolean().required(),
       },
     }),
@@ -65,13 +63,15 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Patch-active endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Patch-active endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const bot = await botService.changeBotActive(
       req.user,
-      req.body.botId,
+      req.params.botId,
       req.body.isActive
     );
 
@@ -80,11 +80,13 @@ router.patch(
 );
 
 router.patch(
-  '/credentials',
+  '/:botId/credentials',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         username: Joi.string().required(),
         password: Joi.string().required(),
       },
@@ -93,7 +95,8 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Patch-credentials endpoint with body: ' +
+      'Calling Patch-credentials endpoint with data: ' +
+        JSON.stringify(req.params) +
         JSON.stringify(req.body)
     );
     const botService = new BotService();
@@ -104,7 +107,7 @@ router.patch(
     const instagramUrl = `https://www.instagram.com/${req.body.username}`;
     const bot = await botService.changeCredentials(
       req.user,
-      req.body.botId,
+      req.params.botId,
       credentials,
       instagramUrl
     );
@@ -114,10 +117,10 @@ router.patch(
 );
 
 router.delete(
-  '/',
+  '/:botId',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
       },
     }),
@@ -125,11 +128,11 @@ router.delete(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Delete-Bot endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Delete-Bot endpoint with data: ' + JSON.stringify(req.params)
     );
     const botService = new BotService();
 
-    const bot = await botService.deleteBot(req.user, req.body.botId);
+    const bot = await botService.deleteBot(req.user, req.params.botId);
 
     res.send({ bot });
   }
@@ -138,29 +141,30 @@ router.delete(
 //=========================Replies=========================//
 
 router.get(
-  //TODO:
-  // PUT PAGENUM AND PAGESIZE IN URL
-  //get or post?
-  '/reply',
+  '/:botId/reply',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
-        pageNum: Joi.number().min(1),
-        pageSize: Joi.number().min(1),
+      },
+      [Segments.QUERY]: {
+        pageNum: Joi.number().required().min(1),
+        pageSize: Joi.number().required().min(1),
       },
     }),
     auth,
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Get-Replies endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Get-Replies endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.query)
     );
     const botService = new BotService();
 
     const botAndReplies = await botService.getRepliesByBot(
       req.user,
-      req.query.botId,
+      req.params.botId,
       req.query.pageNum,
       req.query.pageSize
     );
@@ -170,11 +174,13 @@ router.get(
 );
 
 router.post(
-  '/reply',
+  '/:botId/reply',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         keywords: Joi.array().items(Joi.string()).required().min(1),
         answer: Joi.string().required(),
       },
@@ -183,13 +189,15 @@ router.post(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Create-Reply endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Create-Reply endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const reply = await botService.addReply(
       req.user,
-      req.body.botId,
+      req.params.botId,
       req.body.keywords,
       req.body.answer
     );
@@ -199,12 +207,14 @@ router.post(
 );
 
 router.patch(
-  '/reply',
+  '/:botId/reply/:replyId',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         keywords: Joi.array().items(Joi.string()).required().min(1),
         answer: Joi.string().required(),
       },
@@ -213,14 +223,16 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Patch-Reply endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Patch-Reply endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const reply = await botService.editReply(
       req.user,
-      req.body.botId,
-      req.body.replyId,
+      req.params.botId,
+      req.params.replyId,
       req.body.keywords,
       req.body.answer
     );
@@ -230,12 +242,14 @@ router.patch(
 );
 
 router.patch(
-  '/reply/isActive',
+  '/:botId/reply/:replyId/isActive',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         isActive: Joi.boolean().required(),
       },
     }),
@@ -243,15 +257,16 @@ router.patch(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Patch-reply-active endpoint with body: ' +
+      'Calling Patch-reply-active endpoint with data: ' +
+        JSON.stringify(req.params) +
         JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const reply = await botService.changeBotActive(
       req.user,
-      req.body.botId,
-      req.body.repplyId,
+      req.params.botId,
+      req.params.repplyId,
       req.body.isActive
     );
 
@@ -260,10 +275,10 @@ router.patch(
 );
 
 router.delete(
-  '/reply',
+  '/:botId/reply/:replyId',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
         replyId: Joi.objectId().required(),
       },
@@ -272,26 +287,28 @@ router.delete(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Delete-Reply endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Delete-Reply endpoint with data: ' + JSON.stringify(req.params)
     );
     const botService = new BotService();
 
     const reply = await botService.deleteReply(
       req.user,
-      req.body.botId,
-      req.body.replyId
+      req.params.botId,
+      req.params.replyId
     );
 
     res.send({ reply });
   }
 );
 
-router.put(
-  '/default-reply',
+router.patch(
+  '/:botId/default-reply',
   [
     celebrate({
-      body: {
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
         defaultReply: Joi.string().required(),
       },
     }),
@@ -299,13 +316,15 @@ router.put(
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Delete-Reply endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Delete-Reply endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const bot = await botService.editDefaultReply(
       req.user,
-      req.body.botId,
+      req.params.botId,
       req.body.defaultReply
     );
 
@@ -316,26 +335,30 @@ router.put(
 //=========================Moderators=========================//
 
 router.patch(
-  '/invite-moderator',
+  '/:botId/invite-moderator',
   [
     celebrate({
-      body: {
-        userToInviteId: Joi.objectId().required(),
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
+        userToInviteId: Joi.objectId().required(),
       },
     }),
     auth,
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Invite-Moderator endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Invite-Moderator endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const bot = await botService.inviteModerator(
       req.user,
       req.body.userToInviteId,
-      req.body.botId
+      req.params.botId
     );
 
     res.send({ bot });
@@ -343,26 +366,30 @@ router.patch(
 );
 
 router.patch(
-  '/remove-moderator',
+  '/:botId/remove-moderator',
   [
     celebrate({
-      body: {
-        userToRemoveId: Joi.objectId().required(),
+      [Segments.PARAMS]: {
         botId: Joi.objectId().required(),
+      },
+      [Segments.BODY]: {
+        userToRemoveId: Joi.objectId().required(),
       },
     }),
     auth,
   ],
   async (req, res) => {
     logger.debug(
-      'Calling Remove-Moderator endpoint with body: ' + JSON.stringify(req.body)
+      'Calling Remove-Moderator endpoint with data: ' +
+        JSON.stringify(req.params) +
+        JSON.stringify(req.body)
     );
     const botService = new BotService();
 
     const bot = await botService.removeModerator(
       req.user,
       req.body.userToRemoveId,
-      req.body.botId
+      req.params.botId
     );
 
     res.send({ bot });
