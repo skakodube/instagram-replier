@@ -77,7 +77,7 @@ describe('/user', () => {
     await request(app)
       .get('/user/send-activate-email')
       .set('x-auth-token', authToken)
-      .send({
+      .query({
         link: 'link1',
       })
       .expect(200);
@@ -104,10 +104,7 @@ describe('/user', () => {
   test('GET/send-recover-email', async () => {
     await request(app)
       .get('/user/send-recover-email')
-      .send({
-        email: 'skakodube@gmail.com',
-        link: 'link1',
-      })
+      .query({ email: 'skakodube@gmail.com', link: 'link1' })
       .expect(200);
   });
 

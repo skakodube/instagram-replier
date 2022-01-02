@@ -126,35 +126,22 @@ describe('botService', () => {
     });
   });
   describe('createBot', () => {
-    const instagramUrl = 'url';
     const credentials = { username: 'abc', password: 'abc' };
     it('should return created bot', async () => {
       mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
       mockingoose(BotModel).toReturn(null, 'findOne'); //db mock
 
-      const result = await botService.createBot(user, {
-        instagramUrl,
-        credentials,
-      });
-      expect(result).toHaveProperty('instagramUrl', 'url');
+      const result = await botService.createBot(user, credentials);
+      expect(result).toHaveProperty('credentials.username', 'abc');
     });
     runTestUserNotFound(async function () {
-      await botService.createBot(user, {
-        instagramUrl,
-        credentials,
-      });
+      await botService.createBot(user, credentials);
     });
     runTestUserNotVerified(async function () {
-      await botService.createBot(user, {
-        instagramUrl,
-        credentials,
-      });
+      await botService.createBot(user, credentials);
     });
     runTestBotAlreadyExist(async function () {
-      await botService.createBot(user, {
-        instagramUrl,
-        credentials,
-      });
+      await botService.createBot(user, credentials);
     });
   });
   describe('changeBotActive', () => {

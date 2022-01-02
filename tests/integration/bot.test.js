@@ -37,7 +37,6 @@ describe('/bot', () => {
   beforeEach(async () => {
     bot = new BotModel({
       userCreated: user._id,
-      instagramUrl: 'url1',
       credentials: {
         username: 'abc',
         password: 'abc',
@@ -64,7 +63,7 @@ describe('/bot', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.user._id).toEqual(user._id.toString());
-        expect(res.body.user.OwnedBots[0].instagramUrl).toEqual('url1');
+        expect(res.body.user.OwnedBots[0].credentials.username).toEqual('abc');
       });
   });
   test('POST/', async () => {
@@ -73,23 +72,21 @@ describe('/bot', () => {
       .post('/bot/')
       .set('x-auth-token', authToken)
       .send({
-        instagramUrl: 'url1',
         username: 'abc',
         password: 'abc',
       })
       .expect('Content-Type', /json/)
       .expect(200)
       .then((res) => {
-        expect(res.body.bot.instagramUrl).toEqual('url1');
+        expect(res.body.bot.credentials.username).toEqual('abc');
       });
   });
 
   test('PATCH/', async () => {
     await request(app)
-      .patch('/bot/isActive')
+      .patch(`/bot/${bot._id}/isActive`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
         isActive: false,
       })
       .expect('Content-Type', /json/)
@@ -101,10 +98,9 @@ describe('/bot', () => {
 
   test('PATCH/', async () => {
     await request(app)
-      .patch('/bot/credentials')
+      .patch(`/bot/${bot._id}/credentials`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
         username: 'username',
         password: 'password',
       })
@@ -114,16 +110,13 @@ describe('/bot', () => {
 
   test('DELETE/', async () => {
     await request(app)
-      .delete('/bot')
+      .delete(`/bot/${bot._id}`)
       .set('x-auth-token', authToken)
-      .send({
-        botId: bot._id,
-      })
       .expect('Content-Type', /json/)
       .expect(200)
       .then(async (res) => {
         expect(res.body.bot._id).toEqual(bot._id.toString());
-        expect(res.body.bot.instagramUrl).toEqual('url1');
+        expect(res.body.bot.credentials.username).toEqual('abc');
       });
   });
   test('GET/reply', async () => {
@@ -139,13 +132,9 @@ describe('/bot', () => {
     await reply.save();
 
     await request(app)
-      .get('/bot/reply')
+      .get(`/bot/${bot._id}/reply`)
+      .query({ pageNum: 1, pageSize: 10 })
       .set('x-auth-token', authToken)
-      .send({
-        botId: bot._id,
-        pageNum: 1,
-        pageSize: 10,
-      })
       .expect('Content-Type', /json/)
       .expect(200)
       .then((res) => {
@@ -156,10 +145,9 @@ describe('/bot', () => {
   });
   test('POST/reply', async () => {
     await request(app)
-      .post('/bot/reply')
+      .post(`/bot/${bot._id}/reply`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
         keywords: ['keyword1', 'keyword2'],
         answer: 'answer',
       })
@@ -183,11 +171,9 @@ describe('/bot', () => {
     await reply.save();
 
     await request(app)
-      .patch('/bot/reply')
+      .patch(`/bot/${bot._id}/reply/${reply._id}`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
-        replyId: reply._id,
         keywords: ['new keyword1', 'new keyword2'],
         answer: 'new answer',
       })
@@ -218,11 +204,9 @@ describe('/bot', () => {
     await reply.save();
 
     await request(app)
-      .patch('/bot/reply/isActive')
+      .patch(`/bot/${bot._id}/reply/${reply._id}/isActive`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
-        replyId: reply._id,
         isActive: isActive,
       })
       .expect('Content-Type', /json/)
@@ -244,12 +228,8 @@ describe('/bot', () => {
     await reply.save();
 
     await request(app)
-      .delete('/bot/reply')
+      .delete(`/bot/${bot._id}/reply/${reply._id}`)
       .set('x-auth-token', authToken)
-      .send({
-        botId: bot._id,
-        replyId: reply._id,
-      })
       .expect('Content-Type', /json/)
       .expect(200)
       .then((res) => {
@@ -257,12 +237,11 @@ describe('/bot', () => {
         expect(res.body.reply.keywords).toEqual(['keyword1', 'keyword2']);
       });
   });
-  test('PUT/default-reply', async () => {
+  test('PATCH/default-reply', async () => {
     await request(app)
-      .put('/bot/default-reply')
+      .patch(`/bot/${bot._id}/default-reply`)
       .set('x-auth-token', authToken)
       .send({
-        botId: bot._id,
         defaultReply: 'hello',
       })
       .expect('Content-Type', /json/)
@@ -274,11 +253,10 @@ describe('/bot', () => {
 
   test('PATCH/invite-moderator', async () => {
     await request(app)
-      .patch('/bot/invite-moderator')
+      .patch(`/bot/${bot._id}/invite-moderator`)
       .set('x-auth-token', authToken)
       .send({
         userToInviteId: userToInvite._id,
-        botId: bot._id,
       })
       .expect('Content-Type', /json/)
       .expect(200)
@@ -297,11 +275,10 @@ describe('/bot', () => {
     await bot.save();
 
     await request(app)
-      .patch('/bot/remove-moderator')
+      .patch(`/bot/${bot._id}/remove-moderator`)
       .set('x-auth-token', authToken)
       .send({
         userToRemoveId: userToInvite._id,
-        botId: bot._id,
       })
       .expect('Content-Type', /json/)
       .expect(200)

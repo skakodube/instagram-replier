@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/start.js",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "test": " jest --group=integration/routes/auth --watchAll --verbose --detectOpenHandles --coverage"
+    "test": " jest --group=unit --watchAll --verbose --detectOpenHandles"
   },
   "engines": {
     "node": "16.6.1"
