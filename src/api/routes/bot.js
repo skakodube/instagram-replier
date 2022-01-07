@@ -263,10 +263,10 @@ router.patch(
     );
     const botService = new BotService();
 
-    const reply = await botService.changeBotActive(
+    const reply = await botService.changeReplyActive(
       req.user,
       req.params.botId,
-      req.params.repplyId,
+      req.params.replyId,
       req.body.isActive
     );
 
