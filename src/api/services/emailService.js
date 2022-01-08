@@ -28,7 +28,7 @@ module.exports = class EmailService {
       from: emailFrom,
       dynamic_template_data: {
         user_name: userRecord.firstName,
-        Weblink: linkToFront + '/account/confirm' + userRecord.resetToken,
+        Weblink: linkToFront + '/account/confirm/' + userRecord.resetToken,
       },
       template_id: verificationTemplate,
     };

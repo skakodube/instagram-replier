@@ -8,6 +8,7 @@ module.exports.generateJWT = function (user) {
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    isVerified: user.isVerified,
   };
 
   return jwt.sign(payload, config.jwtSecret, {
