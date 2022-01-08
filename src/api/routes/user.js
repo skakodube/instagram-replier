@@ -118,30 +118,15 @@ router.patch(
 );
 
 //=========================AccountVerification=========================//
-router.get(
-  '/send-activate-email',
-  [
-    celebrate({
-      [Segments.QUERY]: {
-        link: Joi.string().required().min(1).max(255),
-      },
-    }),
-    auth,
-  ],
-  async (req, res) => {
-    logger.debug(
-      'Calling Send-Activate-Email endpoint with data: ' +
-        JSON.stringify(req.query)
-    );
-    const emailService = new EmailService();
-    logger.silly(
-      'Sending verification email to: ' + JSON.stringify(req.user.email)
-    );
-    await emailService.sendVerificationEmail(req.user.email, req.query.link);
+router.get('/send-activate-email', [auth], async (req, res) => {
+  logger.silly(
+    'Sending verification email to: ' + JSON.stringify(req.user.email)
+  );
+  const emailService = new EmailService();
+  await emailService.sendVerificationEmail(req.user.email);
 
-    res.send('OK');
-  }
-);
+  res.send('OK');
+});
 
 router.patch(
   '/activate-account',
@@ -173,7 +158,6 @@ router.get(
     celebrate({
       [Segments.QUERY]: {
         email: Joi.string().required().min(5).max(255).email(),
-        link: Joi.string().required().min(1).max(255),
       },
     }),
   ],
@@ -186,10 +170,7 @@ router.get(
       'Sending recover passwor email to: ' + JSON.stringify(req.query.email)
     );
     const emailService = new EmailService();
-    await emailService.sendRecoverPasswordEmail(
-      req.query.email,
-      req.query.link
-    );
+    await emailService.sendRecoverPasswordEmail(req.query.email);
 
     res.send('OK');
   }

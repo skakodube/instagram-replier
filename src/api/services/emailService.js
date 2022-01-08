@@ -9,9 +9,10 @@ const verificationTemplate = config.emails.verificationTemplate;
 const resetPasswordTemplate = config.emails.recoverTemplate;
 const changeEmailNoticeTemplate = config.emails.noticeTemplate;
 const emailFrom = config.emails.apiSender;
+const linkToFront = config.linkToFront;
 
 module.exports = class EmailService {
-  async sendVerificationEmail(email, confirmLink) {
+  async sendVerificationEmail(email) {
     //TODO:
     //Send OK return or send email to unregistered?
     const userRecord = await UserModel.findOne({
@@ -27,10 +28,7 @@ module.exports = class EmailService {
       from: emailFrom,
       dynamic_template_data: {
         user_name: userRecord.firstName,
-        Weblink:
-          //confirmLink
-          'https://instagram.replier.com/account/confirm/' +
-          userRecord.resetToken,
+        Weblink: linkToFront + '/account/confirm' + userRecord.resetToken,
       },
       template_id: verificationTemplate,
     };
@@ -40,7 +38,7 @@ module.exports = class EmailService {
     });
   }
 
-  async sendRecoverPasswordEmail(email, resetLink) {
+  async sendRecoverPasswordEmail(email) {
     //TODO:
     //Send OK return or send email to unregistered?
     const userRecord = await UserModel.findOne({
@@ -55,10 +53,7 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
-        Weblink:
-          //confirmLink
-          'https://instagram.replier.com/account/recover/' +
-          userRecord.resetToken,
+        Weblink: linkToFront + '/account/recover/' + userRecord.resetToken,
       },
       template_id: resetPasswordTemplate,
     };

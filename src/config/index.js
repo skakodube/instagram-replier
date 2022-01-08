@@ -24,4 +24,6 @@ module.exports = {
   },
 
   mode: process.env.NODE_ENV || 'development',
+
+  linkToFront: process.env.FRONTLINK,
 };
