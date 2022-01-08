@@ -47,7 +47,7 @@ module.exports = class BotService {
       throw new PermissionError('🔥 User Is Not Verified.');
 
     let botRecord = await BotModel.findOne({
-      username: credentials.username,
+      credentials: { username: credentials.username },
     });
     if (botRecord)
       throw new BotAlreadyExistError('🔥 Bot Username Already Exist.');
