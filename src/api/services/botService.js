@@ -86,7 +86,7 @@ module.exports = class BotService {
       { _id: botId },
       { isActive },
       { new: true }
-    );
+    ).or([{ userCreated: userRecord._id }, { userModerators: userRecord._id }]);
     if (!botRecord) throw new BotNotFoundError();
 
     return _.pick(botRecord, [
@@ -206,8 +206,10 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: botId,
-      userCreated: userRecord._id,
-    });
+    }).or([
+      { userCreated: userRecord._id },
+      { userModerators: userRecord._id },
+    ]);
     if (!botRecord) throw new BotNotFoundError();
 
     const replyRecord = await ReplyModel.findOne({
@@ -251,8 +253,10 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: botId,
-      userCreated: userRecord._id,
-    });
+    }).or([
+      { userCreated: userRecord._id },
+      { userModerators: userRecord._id },
+    ]);
     if (!botRecord) throw new BotNotFoundError();
 
     const editedReplyRecord = await ReplyModel.findOneAndUpdate(
@@ -283,7 +287,10 @@ module.exports = class BotService {
     if (!userRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
-    const botRecord = await BotModel.findOne({ _id: botId });
+    const botRecord = await BotModel.findOne({ _id: botId }).or([
+      { userCreated: userRecord._id },
+      { userModerators: userRecord._id },
+    ]);
     if (!botRecord) throw new BotNotFoundError();
 
     const replyRecord = await ReplyModel.findOneAndUpdate(
@@ -315,8 +322,10 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: mongoose.Types.ObjectId(botId),
-      userCreated: userRecord._id,
-    });
+    }).or([
+      { userCreated: userRecord._id },
+      { userModerators: userRecord._id },
+    ]);
     if (!botRecord) throw new BotNotFoundError();
 
     const deletedReplyRecord = await ReplyModel.findOneAndDelete({
@@ -346,13 +355,12 @@ module.exports = class BotService {
     const botRecord = await BotModel.findOneAndUpdate(
       {
         _id: mongoose.Types.ObjectId(botId),
-        userCreated: userRecord._id,
       },
       {
         defaultReply,
       },
       { new: true }
-    );
+    ).or([{ userCreated: userRecord._id }, { userModerators: userRecord._id }]);
     if (!botRecord) throw new BotNotFoundError();
 
     return _.pick(botRecord, [

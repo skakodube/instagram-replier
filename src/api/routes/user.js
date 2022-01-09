@@ -10,7 +10,14 @@ const jwt = require('../helpers/jwt');
 const _ = require('lodash');
 const logger = require('../loaders/logging');
 
-//TODO: REMOVE AWAIT ON EMAILING
+router.get('/', auth, async (req, res) => {
+  logger.debug('Calling Get-Current-User endpoint');
+  const userService = new UserService();
+
+  user = await userService.getMe(req.user);
+
+  res.send({ user });
+});
 
 router.put(
   '/',

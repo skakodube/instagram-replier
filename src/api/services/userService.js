@@ -49,21 +49,32 @@ module.exports = class UserService {
     ]);
   }
 
-  // async getMe(user) {
-  //   let userRecord = await UserModel.findOne({
-  //     email: user.email,
-  //   });
-  //   if (!userRecord) throw new UserNotFoundError();
-
-  //   return _.pick(userRecord, [
-  //     "_id",
-  //     "firstName",
-  //     "lastName",
-  //     "email",
-  //     "isVerified",
-  //     "isAdmin",
-  //   ]);
-  // }
+  async getMe(user) {
+    let userRecord = await UserModel.findOne({
+      email: user.email,
+    });
+    if (!userRecord) throw new UserNotFoundError();
+    userRecord = _.set(
+      userRecord,
+      'OwnedBotsQuantity',
+      userRecord.OwnedBots.length
+    );
+    userRecord = _.set(
+      userRecord,
+      'InvitedBotsQuantity',
+      userRecord.InvitedBots.length
+    );
+    return (userRecord = _.pick(userRecord, [
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
+      'isVerified',
+      'isAdmin',
+      'OwnedBotsQuantity',
+      'InvitedBotsQuantity',
+    ]));
+  }
 
   async edit(user, newFirstName, newLastName) {
     let userRecord = await UserModel.findOneAndUpdate(
