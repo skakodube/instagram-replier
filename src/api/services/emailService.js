@@ -53,7 +53,8 @@ module.exports = class EmailService {
       to: userRecord.email,
       from: emailFrom,
       dynamic_template_data: {
-        Weblink: linkToFront + '/account/recover/' + userRecord.resetToken,
+        Weblink:
+          linkToFront + '/accounts/password/reset/' + userRecord.resetToken,
       },
       template_id: resetPasswordTemplate,
     };
