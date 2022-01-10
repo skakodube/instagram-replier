@@ -342,7 +342,7 @@ router.patch(
         botId: Joi.objectId().required(),
       },
       [Segments.BODY]: {
-        userToInviteId: Joi.objectId().required(),
+        userToInviteEmail: Joi.string().required(),
       },
     }),
     auth,
@@ -357,7 +357,7 @@ router.patch(
 
     const bot = await botService.inviteModerator(
       req.user,
-      req.body.userToInviteId,
+      req.body.userToInviteEmail,
       req.params.botId
     );
 

@@ -375,7 +375,7 @@ module.exports = class BotService {
     ]);
   }
 
-  async inviteModerator(userOwner, userToInviteId, botId) {
+  async inviteModerator(userOwner, userToInviteEmail, botId) {
     const userOwnerRecord = await UserModel.findOne({
       email: userOwner.email,
     });
@@ -383,14 +383,16 @@ module.exports = class BotService {
     if (!userOwnerRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
-    const userToInviteRecord = await UserModel.findById(userToInviteId);
+    const userToInviteRecord = await UserModel.findOne({
+      email: userToInviteEmail,
+    });
 
     if (!userToInviteRecord) throw new UserNotFoundError();
     if (!userToInviteRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
     const botRecord = await BotModel.findOne({
-      _id: mongoose.Types.ObjectId(botId),
+      email: mongoose.Types.ObjectId(botId),
       userCreated: userOwnerRecord._id,
       userModerators: { $ne: userToInviteRecord._id },
     });
