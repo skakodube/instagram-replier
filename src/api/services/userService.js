@@ -1,5 +1,6 @@
 const UserModel = require('../models/user');
 const _ = require('lodash');
+const mongoose = require("mongoose");
 const UserAlreadyExistError = require('../errors/userAlreadyExist');
 const UserNotFoundError = require('../errors/userNotFound');
 const InvalidTokenError = require('../errors/invalidToken');
@@ -73,6 +74,18 @@ module.exports = class UserService {
       'isAdmin',
       'OwnedBotsQuantity',
       'InvitedBotsQuantity',
+    ]));
+  }
+
+  async getUsername(id) {
+    let userRecord = await UserModel.findById(mongoose.Types.ObjectId(id));
+    if (!userRecord) throw new UserNotFoundError();
+
+    return (userRecord = _.pick(userRecord, [
+      '_id',
+      'firstName',
+      'lastName',
+      'email',
     ]));
   }
 
