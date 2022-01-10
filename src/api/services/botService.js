@@ -20,7 +20,7 @@ module.exports = class BotService {
           path: 'OwnedBots',
           model: 'Bot',
           select:
-            '_id credentials.username isActive profilePicture dateCreated isValid',
+            '_id credentials.username isActive profilePicture dateCreated isValid userModerators',
         },
       ])
       .populate([
