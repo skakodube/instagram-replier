@@ -4,6 +4,7 @@ const BotModel = require('../models/bot');
 const ReplyModel = require('../models/reply');
 const _ = require('lodash');
 const UserNotFoundError = require('../errors/userNotFound');
+const UserAlreadyExistError = require('../errors/userAlreadyExist');
 const BotNotFoundError = require('../errors/botNotFound');
 const BotAlreadyExistError = require('../errors/botAlreadyExist');
 const ReplyAlreadyExistError = require('../errors/replyAlreadyExist');
@@ -376,6 +377,8 @@ module.exports = class BotService {
   }
 
   async inviteModerator(userOwner, userToInviteEmail, botId) {
+    if (userOwner.email == userToInviteEmail)
+      throw new UserAlreadyExistError('🔥 Owner user cannot be invited');
     const userOwnerRecord = await UserModel.findOne({
       email: userOwner.email,
     });
