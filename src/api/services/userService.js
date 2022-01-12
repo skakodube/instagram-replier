@@ -1,6 +1,6 @@
 const UserModel = require('../models/user');
 const _ = require('lodash');
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const UserAlreadyExistError = require('../errors/userAlreadyExist');
 const UserNotFoundError = require('../errors/userNotFound');
 const InvalidTokenError = require('../errors/invalidToken');
@@ -23,7 +23,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
     ]);
   }
 
@@ -34,7 +33,7 @@ module.exports = class UserService {
     if (userRecord) throw new UserAlreadyExistError();
 
     userRecord = new UserModel(
-      _.pick(user, ['firstName', 'lastName', 'email', 'password', 'isAdmin'])
+      _.pick(user, ['firstName', 'lastName', 'email', 'password'])
     );
     userRecord.password = user.password;
 
@@ -46,7 +45,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
     ]);
   }
 
@@ -71,7 +69,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
       'OwnedBotsQuantity',
       'InvitedBotsQuantity',
     ]));
@@ -109,7 +106,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
     ]);
   }
 
@@ -134,7 +130,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
     ]);
   }
 
@@ -188,7 +183,6 @@ module.exports = class UserService {
       'lastName',
       'email',
       'isVerified',
-      'isAdmin',
     ]);
 
     return { user, oldEmail };

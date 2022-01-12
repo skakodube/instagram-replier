@@ -31,7 +31,7 @@ module.exports = class BotService {
           InvitedBots: '_id isActive dateCreated',
         },
       ])
-      .select('email firstName lastName isVerified isAdmin dateRegistered');
+      .select('email firstName lastName isVerified dateRegistered');
     if (!userRecordAndBots) throw new UserNotFoundError();
     if (!userRecordAndBots.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
@@ -379,6 +379,7 @@ module.exports = class BotService {
   async inviteModerator(userOwner, userToInviteEmail, botId) {
     if (userOwner.email == userToInviteEmail)
       throw new UserAlreadyExistError('🔥 Owner user cannot be invited');
+
     const userOwnerRecord = await UserModel.findOne({
       email: userOwner.email,
     });

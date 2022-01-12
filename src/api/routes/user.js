@@ -19,21 +19,25 @@ router.get('/', auth, async (req, res) => {
   res.send({ user });
 });
 
-router.post('/', [
-  celebrate({
-    [Segments.BODY]: {
-      id: Joi.objectId().required()
-    },
-  }),
-  auth,
-], async (req, res) => {
-  logger.debug('Calling Get-User endpoint');
-  const userService = new UserService();
+router.post(
+  '/',
+  [
+    celebrate({
+      [Segments.BODY]: {
+        id: Joi.objectId().required(),
+      },
+    }),
+    auth,
+  ],
+  async (req, res) => {
+    logger.debug('Calling Get-User endpoint');
+    const userService = new UserService();
 
-  user = await userService.getUsername(req.body.id);
+    user = await userService.getUsername(req.body.id);
 
-  res.send({ user });
-});
+    res.send({ user });
+  }
+);
 
 router.put(
   '/',

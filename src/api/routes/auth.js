@@ -25,6 +25,17 @@ router.post(
     const userService = new UserService();
     const user = await userService.login(req.body);
 
+    if (!user.isVerified) {
+      logger.silly(
+        'Sending verification email : ' + JSON.stringify(req.body.email)
+      );
+      const emailService = new EmailService();
+      await emailService.sendVerificationEmail(
+        user.email,
+        req.body.verificationLink
+      );
+    }
+
     res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
 );

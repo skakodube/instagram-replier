@@ -6,11 +6,6 @@ const BotService = require('../services/botService');
 const auth = require('../middleware/auth');
 const logger = require('../loaders/logging');
 
-//TODO:
-//add users searcher by email for invites
-//SEND DATA OR OK?
-//VERIFICATION MUST BE MIDDLEWARE
-
 router.get('/', [auth], async (req, res) => {
   logger.debug('Calling Get-Bots endpoint');
   const botService = new BotService();
