@@ -13,8 +13,6 @@ const linkToFront = config.linkToFront;
 
 module.exports = class EmailService {
   async sendVerificationEmail(email) {
-    //TODO:
-    //Send OK return or send email to unregistered?
     const userRecord = await UserModel.findOne({
       email,
     });
