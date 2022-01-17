@@ -189,21 +189,4 @@ module.exports = class UserService {
 
     return;
   }
-  // async changeEmailByToken(user, token) {
-  //   const userRecord = await UserModel.findOne({
-  //     email: user.email,
-  //     resetToken: token,
-  //     resetExpires: { $gt: Date.now() },
-  //   });
-  //   if (!userRecord) throw new ApplicationError("Token is invalid or has expired");
-
-  //   userRecord.email = userRecord.tempEmail;
-  //   userRecord.tempEmail = undefined;
-  //   userRecord.resetToken = undefined;
-  //   userRecord.resetExpires = undefined;
-
-  //   await userRecord.save();
-
-  //   return userRecord;
-  // }
 };

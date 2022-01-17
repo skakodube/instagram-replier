@@ -1,7 +1,6 @@
 const BotModel = require('./bot.js');
 const mongoose = require('mongoose');
 
-//TODO unique keywords?
 const ReplySchema = new mongoose.Schema(
   {
     botBelongs: {

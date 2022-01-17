@@ -37,8 +37,6 @@ module.exports = class EmailService {
   }
 
   async sendRecoverPasswordEmail(email) {
-    //TODO:
-    //Send OK return or send email to unregistered?
     const userRecord = await UserModel.findOne({
       email: email,
     });

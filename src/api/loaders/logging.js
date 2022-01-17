@@ -2,8 +2,6 @@ const winston = require('winston');
 require('express-async-errors');
 const config = require('../../config');
 
-//if test is running remove db logger
-
 const logLevels = {
   colors: {
     error: 'red',

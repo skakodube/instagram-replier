@@ -23,14 +23,15 @@ module.exports = class BotService {
           populate: {
             path: 'userCreated',
             model: 'User',
-            select: 'email firstName lastName',
+            select: '_id email firstName lastName',
           },
           populate: {
             path: 'userModerators',
             model: 'User',
-            select: 'email firstName lastName',
+            select: '_id email firstName lastName',
           },
-          select: '_id credentials.username isActive isValid dateCreated',
+          select:
+            '_id credentials.username defaultReply isActive isValid dateCreated',
         },
       ])
       .populate([
@@ -53,7 +54,8 @@ module.exports = class BotService {
             model: 'User',
             select: '_id email firstName lastName',
           },
-          select: '_id credentials.username isActive isValid dateCreated',
+          select:
+            '_id credentials.username defaultReply isActive isValid dateCreated',
         },
       ])
       .select('email firstName lastName isVerified dateRegistered');
@@ -182,6 +184,8 @@ module.exports = class BotService {
     ]);
   }
 
+  //=========================Replies=========================//
+
   async getRepliesByBot(user, botId, pageNum, pageSize) {
     const userRecord = await UserModel.findOne({
       email: user.email,
@@ -240,11 +244,12 @@ module.exports = class BotService {
 
     const replyRecord = await ReplyModel.findOne({
       botBelongs: botRecord._id,
+      keywords: { $in: [newKeywords] },
       answer: newAnswer,
     });
     if (replyRecord)
       throw new ReplyAlreadyExistError(
-        '🔥 Reply With This Answer Already Exist.'
+        '🔥 Reply With This Answer Or Keywords Already Exist.'
       );
 
     const newReply = new ReplyModel({
@@ -252,7 +257,8 @@ module.exports = class BotService {
       keywords: newKeywords,
       answer: newAnswer,
     });
-    // {$addToSet: {users: userOid}} *uniqness* *not work*
+    // unique shortcut *not work*
+    // {$addToSet: {users: userOid}}
 
     botRecord.replies.push(newReply._id);
 
@@ -269,7 +275,7 @@ module.exports = class BotService {
     ]);
   }
 
-  async editReply(user, botId, replyId, keywords, newAnswer) {
+  async editReply(user, botId, replyId, newKeywords, newAnswer) {
     const userRecord = await UserModel.findOne({
       email: user.email,
     });
@@ -286,14 +292,22 @@ module.exports = class BotService {
     if (!botRecord) throw new BotNotFoundError();
 
     const editedReplyRecord = await ReplyModel.findOneAndUpdate(
-      { _id: replyId, botBelongs: botRecord._id },
       {
-        keywords: keywords,
+        _id: replyId,
+        botBelongs: botRecord._id,
+        keywords: { $nin: [newKeywords] },
+        answer: { $ne: newAnswer },
+      },
+      {
+        keywords: newKeywords,
         answer: newAnswer,
       },
       { new: true }
     );
-    if (!editedReplyRecord) throw new ReplyNotFoundError();
+    if (!editedReplyRecord)
+      throw new ReplyNotFoundError(
+        '🔥 No Reply found Or Keywords/Answer Already Used.'
+      );
 
     return _.pick(editedReplyRecord, [
       '_id',
@@ -400,7 +414,9 @@ module.exports = class BotService {
       'createdAt',
     ]);
   }
-  //populate
+
+  //=========================Moderators=========================//
+
   async inviteModerator(userOwner, userToInviteEmail, botId) {
     if (userOwner.email == userToInviteEmail)
       throw new UserAlreadyExistError('🔥 Owner user cannot be invited');
@@ -409,6 +425,7 @@ module.exports = class BotService {
     if (!userOwnerRecord) throw new UserNotFoundError();
     if (!userOwnerRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
+
     const userToInviteRecord = await UserModel.findOne({
       email: userToInviteEmail,
     });
@@ -416,14 +433,14 @@ module.exports = class BotService {
     if (!userToInviteRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
-    const botRecord = await BotModel.findOne({
-      email: mongoose.Types.ObjectId(botId),
+    let botRecord = await BotModel.findOne({
+      id: mongoose.Types.ObjectId(botId),
       userCreated: userOwnerRecord._id,
-      userModerators: { $ne: userToInviteRecord._id },
+      userModerators: { $nin: userToInviteRecord._id },
     });
     if (!botRecord)
       throw new BotNotFoundError(
-        '🔥 Bot Not Found Or User is Already Moderated.'
+        '🔥 Bot Not Found Or User is Already Moderator.'
       );
 
     userToInviteRecord.InvitedBots.push(botRecord._id);
@@ -432,17 +449,22 @@ module.exports = class BotService {
     await userToInviteRecord.save();
     await botRecord.save();
 
-    return _.pick(botRecord, [
-      '_id',
-      'credentials.username',
-      'isActive',
-      'isValid',
-      'replies',
-      'defaultReply',
-      'userCreated',
-      'userModerators',
-      'createdAt',
-    ]);
+    botRecord = await BotModel.findById(botId)
+      .populate({
+        path: 'userCreated',
+        model: 'User',
+        select: '_id email firstName lastName',
+      })
+      .populate({
+        path: 'userModerators',
+        model: 'User',
+        select: '_id email firstName lastName',
+      })
+      .select(
+        '_id credentials.username isActive isValid defaultReply dateCreated'
+      );
+
+    return botRecord;
   }
 
   async removeModerator(userOwner, userToRemoveId, botId) {
@@ -460,7 +482,7 @@ module.exports = class BotService {
     if (!userToRemoveRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
-    const botRecord = await BotModel.findOneAndUpdate(
+    let botRecord = await BotModel.findOneAndUpdate(
       {
         _id: mongoose.Types.ObjectId(botId),
         userCreated: userOwnerRecord._id,
@@ -472,26 +494,28 @@ module.exports = class BotService {
       { new: true }
     );
 
-    if (!botRecord)
-      throw new BotNotFoundError(
-        '🔥 Bot Not Found or User is Already Invited.'
-      );
+    if (!botRecord) throw new BotNotFoundError('🔥 Bot Not Found.');
 
     await UserModel.updateOne(
       { _id: userToRemoveRecord._id },
       { $pull: { InvitedBots: botRecord._id } }
     );
 
-    return _.pick(botRecord, [
-      '_id',
-      'credentials.username',
-      'isActive',
-      'isValid',
-      'replies',
-      'defaultReply',
-      'userCreated',
-      'userModerators',
-      'createdAt',
-    ]);
+    botRecord = await BotModel.findById(botId)
+      .populate({
+        path: 'userCreated',
+        model: 'User',
+        select: '_id email firstName lastName',
+      })
+      .populate({
+        path: 'userModerators',
+        model: 'User',
+        select: '_id email firstName lastName',
+      })
+      .select(
+        '_id credentials.username isActive isValid defaultReply dateCreated'
+      );
+    console.log(botRecord.userModerators);
+    return botRecord;
   }
 };

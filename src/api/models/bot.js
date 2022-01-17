@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const UserModel = require('./user');
-//TODO
-//instagramUrl unique
 const BotSchema = new mongoose.Schema(
   {
     userCreated: {
@@ -62,7 +60,8 @@ BotSchema.pre('findOneAndDelete', async function (next) {
     { multi: true }
   ).exec();
   next();
-  // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec(); *circular depedency error*
+  // shorter way, but throws *circular depedency error*
+  // await ReplyModel.deleteMany({ botBelongs: docToDelete._id }).exec();
 });
 
 module.exports = mongoose.model('Bot', BotSchema);
