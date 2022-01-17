@@ -337,7 +337,7 @@ router.patch(
         botId: Joi.objectId().required(),
       },
       [Segments.BODY]: {
-        userToInviteEmail: Joi.string().required(),
+        userToInviteEmail: Joi.string().required().email(),
       },
     }),
     auth,

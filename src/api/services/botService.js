@@ -405,7 +405,7 @@ module.exports = class BotService {
     if (userOwner.email == userToInviteEmail)
       throw new UserAlreadyExistError('🔥 Owner user cannot be invited');
 
-    const userOwnerRecord = await UserModel.findById(userOwner._id);
+    const userOwnerRecord = await UserModel.findById(userOwner.id);
     if (!userOwnerRecord) throw new UserNotFoundError();
     if (!userOwnerRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
