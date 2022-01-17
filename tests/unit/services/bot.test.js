@@ -18,19 +18,19 @@ const PermissionError = require('../../../src/api/errors/permissionError');
 const BotService = require('../../../src/api/services/botService');
 
 let user, bot, reply, user2;
-async function runTestUserNotFound(callback) {
+async function runTestUserNotFound(callback, strDbMock = 'findOne') {
   it('should return error if user is not registered', async () => {
-    mockingoose(UserModel).toReturn(undefined, 'findOne'); //db mock
+    mockingoose(UserModel).toReturn(undefined, strDbMock); //db mock
 
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(UserNotFoundError);
     });
   });
 }
-async function runTestUserNotVerified(callback) {
+async function runTestUserNotVerified(callback, strDbMock = 'findOne') {
   it('should return error if user is not isVerified', async () => {
     user.isVerified = false;
-    mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+    mockingoose(UserModel).toReturn(user, strDbMock); //db mock
 
     return await callback().catch((err) => {
       expect(err).toBeInstanceOf(PermissionError);
@@ -108,7 +108,6 @@ describe('botService', () => {
   });
   afterEach(() => {
     mockingoose.resetAll();
-    // UserModel.findById = null;
   });
   describe('getBots', () => {
     it('should return user and bots assigned', async () => {
@@ -378,52 +377,77 @@ describe('botService', () => {
     }, 'findOneAndUpdate');
   });
   describe('inviteModerator', () => {
-    it('should return bot with newly user moderator', async () => {
-      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+    it('should return bot with newly added user moderator', async () => {
+      mockingoose(UserModel).toReturn(user, 'findById'); //db mock
       mockingoose(BotModel).toReturn(bot, 'findOne'); //db mock
-      UserModel.findById = jest.fn().mockResolvedValue(user2);
+      UserModel.findOne = jest.fn().mockResolvedValue(user2);
 
-      const result = await botService.inviteModerator(user, user2, bot._id);
+      const result = await botService.inviteModerator(
+        user,
+        user2.email,
+        bot._id
+      );
       expect(result).toHaveProperty('_id', bot._id);
       expect(result).toHaveProperty('userModerators', [user2._id]);
     });
-    runTestUserNotFound(async function () {
-      await botService.inviteModerator(user, user2, bot._id);
-    });
-    runTestUserNotVerified(async function () {
-      await botService.inviteModerator(user, user2, bot._id);
-    });
-    runTestBotNotFound(async function () {
-      await botService.inviteModerator(user, user2, bot._id);
-    });
-    it('should return error if invited user is not registered', async () => {
-      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+    it('should return error if user is not registered', async () => {
       UserModel.findById = jest.fn().mockResolvedValue(null);
 
       return await botService
-        .inviteModerator(user, user2, bot._id)
+        .inviteModerator(user, user2.email, bot._id)
+        .catch((err) => {
+          expect(err).toBeInstanceOf(UserNotFoundError);
+        });
+    });
+    it('should return error if user is not isVerified', async () => {
+      user.isVerified = false;
+      UserModel.findById = jest.fn().mockResolvedValue(user);
+
+      return await botService
+        .inviteModerator(user, user2.email, bot._id)
+        .catch((err) => {
+          expect(err).toBeInstanceOf(PermissionError);
+        });
+    });
+    it('should return error if bot is not created', async () => {
+      UserModel.findById = jest.fn().mockResolvedValue(user);
+      UserModel.findOne = jest.fn().mockResolvedValue(user2);
+      BotModel.findOne = jest.fn().mockResolvedValue(null);
+
+      return await botService
+        .inviteModerator(user, user2.email, bot._id)
+        .catch((err) => {
+          expect(err).toBeInstanceOf(BotNotFoundError);
+        });
+    });
+    it('should return error if invited user is not registered', async () => {
+      mockingoose(UserModel).toReturn(user, 'findById'); //db mock
+      UserModel.findOne = jest.fn().mockResolvedValue(null);
+
+      return await botService
+        .inviteModerator(user, user2.email, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(UserNotFoundError);
         });
     });
     it('should return error if invited user is not isVerified', async () => {
       user2.isVerified = false;
-      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
-      UserModel.findById = jest.fn().mockResolvedValue(user2);
+      mockingoose(UserModel).toReturn(user, 'findById'); //db mock
+      UserModel.findOne = jest.fn().mockResolvedValue(user2);
 
       return await botService
-        .inviteModerator(user, user2, bot._id)
+        .inviteModerator(user, user2.email, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(PermissionError);
         });
     });
     it('should return error if bot is not found', async () => {
-      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
-      UserModel.findById = jest.fn().mockResolvedValue(user2);
+      mockingoose(UserModel).toReturn(user, 'findById'); //db mock
+      UserModel.findOne = jest.fn().mockResolvedValue(user2);
       mockingoose(BotModel).toReturn(new BotNotFoundError(), 'findOne'); //db mock
 
       return await botService
-        .inviteModerator(user, user2, bot._id)
+        .inviteModerator(user, user2.email, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(BotNotFoundError);
         });
@@ -433,27 +457,40 @@ describe('botService', () => {
     it('should return bot with newly removed moderator', async () => {
       bot.userModerators = [user2];
       mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
-      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
       UserModel.findById = jest.fn().mockResolvedValue(user2);
+      mockingoose(BotModel).toReturn(bot, 'findOneAndUpdate'); //db mock
       bot.userModerators = [];
       mockingoose(UserModel).toReturn(null, 'updateOne'); //db mock
 
-      const result = await botService.removeModerator(user, user2, bot._id);
+      const result = await botService.removeModerator(user, user2._id, bot._id);
       expect(result).toHaveProperty('_id', bot._id);
       expect(result).toHaveProperty('userModerators', []);
     });
-    runTestUserNotFound(async function () {
-      await botService.removeModerator(user, user2, bot._id);
+    it('should return error if user is not registered', async () => {
+      UserModel.findOne = jest.fn().mockResolvedValue(null);
+
+      return await botService
+        .removeModerator(user, user2._id, bot._id)
+        .catch((err) => {
+          expect(err).toBeInstanceOf(UserNotFoundError);
+        });
     });
-    runTestUserNotVerified(async function () {
-      await botService.removeModerator(user, user2, bot._id);
+    it('should return error if user is not isVerified', async () => {
+      user.isVerified = false;
+      UserModel.findOne = jest.fn().mockResolvedValue(user);
+
+      return await botService
+        .removeModerator(user, user2._id, bot._id)
+        .catch((err) => {
+          expect(err).toBeInstanceOf(PermissionError);
+        });
     });
     it('should return error if invited user is not registered', async () => {
-      mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
+      UserModel.findOne = jest.fn().mockResolvedValue(user);
       UserModel.findById = jest.fn().mockResolvedValue(null);
 
       return await botService
-        .removeModerator(user, user2, bot._id)
+        .removeModerator(user, user2._id, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(UserNotFoundError);
         });
@@ -464,7 +501,7 @@ describe('botService', () => {
       UserModel.findById = jest.fn().mockResolvedValue(user2);
 
       return await botService
-        .removeModerator(user, user2, bot._id)
+        .removeModerator(user, user2._id, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(PermissionError);
         });
@@ -475,7 +512,7 @@ describe('botService', () => {
       mockingoose(BotModel).toReturn(new BotNotFoundError(), 'findOne'); //db mock
 
       return await botService
-        .removeModerator(user, user2, bot._id)
+        .removeModerator(user, user2._id, bot._id)
         .catch((err) => {
           expect(err).toBeInstanceOf(BotNotFoundError);
         });

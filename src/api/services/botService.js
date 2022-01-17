@@ -20,18 +20,44 @@ module.exports = class BotService {
         {
           path: 'OwnedBots',
           model: 'Bot',
-          select:
-            '_id credentials.username isActive profilePicture dateCreated isValid userModerators',
+          populate: {
+            path: 'userCreated',
+            model: 'User',
+            select: 'email firstName lastName',
+          },
+          populate: {
+            path: 'userModerators',
+            model: 'User',
+            select: 'email firstName lastName',
+          },
+          select: '_id credentials.username isActive isValid dateCreated',
         },
       ])
       .populate([
         {
           path: 'InvitedBots',
           model: 'Bot',
-          InvitedBots: '_id isActive dateCreated',
+          populate: {
+            path: 'userModerators',
+            model: 'User',
+            select: ' _id email firstName lastName',
+          },
+        },
+      ])
+      .populate([
+        {
+          path: 'InvitedBots',
+          model: 'Bot',
+          populate: {
+            path: 'userCreated',
+            model: 'User',
+            select: '_id email firstName lastName',
+          },
+          select: '_id credentials.username isActive isValid dateCreated',
         },
       ])
       .select('email firstName lastName isVerified dateRegistered');
+
     if (!userRecordAndBots) throw new UserNotFoundError();
     if (!userRecordAndBots.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
@@ -48,11 +74,11 @@ module.exports = class BotService {
       throw new PermissionError('🔥 User Is Not Verified.');
 
     let botRecord = await BotModel.findOne({
-      credentials: { username: credentials.username },
+      'credentials.username': credentials.username,
     });
-    if (botRecord)
+    if (botRecord) {
       throw new BotAlreadyExistError('🔥 Bot Username Already Exist.');
-
+    }
     botRecord = new BotModel({
       userCreated: userRecord._id,
       credentials,
@@ -68,7 +94,6 @@ module.exports = class BotService {
       'credentials.username',
       'isValid',
       'isActive',
-      'replies',
       'defaultReply',
       'userCreated',
       'createdAt',
@@ -375,22 +400,18 @@ module.exports = class BotService {
       'createdAt',
     ]);
   }
-
+  //populate
   async inviteModerator(userOwner, userToInviteEmail, botId) {
     if (userOwner.email == userToInviteEmail)
       throw new UserAlreadyExistError('🔥 Owner user cannot be invited');
 
-    const userOwnerRecord = await UserModel.findOne({
-      email: userOwner.email,
-    });
+    const userOwnerRecord = await UserModel.findById(userOwner._id);
     if (!userOwnerRecord) throw new UserNotFoundError();
     if (!userOwnerRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
-
     const userToInviteRecord = await UserModel.findOne({
       email: userToInviteEmail,
     });
-
     if (!userToInviteRecord) throw new UserNotFoundError();
     if (!userToInviteRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
@@ -402,7 +423,7 @@ module.exports = class BotService {
     });
     if (!botRecord)
       throw new BotNotFoundError(
-        '🔥 Bot Not Found Or User is Already Invited.'
+        '🔥 Bot Not Found Or User is Already Moderated.'
       );
 
     userToInviteRecord.InvitedBots.push(botRecord._id);
@@ -428,7 +449,9 @@ module.exports = class BotService {
     const userOwnerRecord = await UserModel.findOne({
       email: userOwner.email,
     });
-    if (!userOwnerRecord) throw new UserNotFoundError();
+    if (!userOwnerRecord) {
+      throw new UserNotFoundError();
+    }
     if (!userOwnerRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 

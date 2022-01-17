@@ -14,7 +14,7 @@ router.get('/', auth, async (req, res) => {
   logger.debug('Calling Get-Current-User endpoint');
   const userService = new UserService();
 
-  user = await userService.getMe(req.user);
+  const user = await userService.getMe(req.user);
 
   res.send({ user });
 });

@@ -104,7 +104,7 @@ describe('/user', () => {
   test('GET/send-recover-email', async () => {
     await request(app)
       .get('/user/send-recover-email')
-      .query({ email: 'skakodube@gmail.com', link: 'link1' })
+      .query({ email: 'skakodube@gmail.com' })
       .expect(200);
   });
 

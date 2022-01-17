@@ -63,7 +63,7 @@ module.exports = class UserService {
       'InvitedBotsQuantity',
       userRecord.InvitedBots.length
     );
-    return (userRecord = _.pick(userRecord, [
+    return _.pick(userRecord, [
       '_id',
       'firstName',
       'lastName',
@@ -71,19 +71,7 @@ module.exports = class UserService {
       'isVerified',
       'OwnedBotsQuantity',
       'InvitedBotsQuantity',
-    ]));
-  }
-
-  async getUsername(id) {
-    let userRecord = await UserModel.findById(mongoose.Types.ObjectId(id));
-    if (!userRecord) throw new UserNotFoundError();
-
-    return (userRecord = _.pick(userRecord, [
-      '_id',
-      'firstName',
-      'lastName',
-      'email',
-    ]));
+    ]);
   }
 
   async edit(user, newFirstName, newLastName) {
@@ -147,8 +135,6 @@ module.exports = class UserService {
     userRecord.password = newPassword;
 
     await userRecord.save();
-
-    return;
   }
 
   async changeEmail(user, newEmail, password) {

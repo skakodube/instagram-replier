@@ -23,6 +23,7 @@ describe('/bot', () => {
     });
     user.password = '12345';
     await user.save();
+
     userToInvite = new UserModel({
       firstName: 'Anna',
       lastName: 'Doe',
@@ -32,6 +33,7 @@ describe('/bot', () => {
     });
     userToInvite.password = '12345';
     await userToInvite.save();
+
     authToken = jwtHelper.generateJWT(user);
   });
   beforeEach(async () => {
@@ -256,7 +258,7 @@ describe('/bot', () => {
       .patch(`/bot/${bot._id}/invite-moderator`)
       .set('x-auth-token', authToken)
       .send({
-        userToInviteId: userToInvite._id,
+        userToInviteEmail: userToInvite.email,
       })
       .expect('Content-Type', /json/)
       .expect(200)

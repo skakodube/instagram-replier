@@ -48,7 +48,6 @@ describe('/auth', () => {
         lastName: 'Doe',
         email: 'skakodube@gmail.com',
         password: '12345',
-        verificationLink: 'link',
       })
       .expect('Content-Type', /json/)
       .expect(200)

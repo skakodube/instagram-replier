@@ -46,7 +46,6 @@ router.post(
           symbol: 0,
           requirementCount: 2,
         }).required(),
-        verificationLink: Joi.string().required().min(1).max(255),
       },
     }),
   ],
@@ -61,10 +60,7 @@ router.post(
       'Sending verification email : ' + JSON.stringify(req.body.email)
     );
     const emailService = new EmailService();
-    await emailService.sendVerificationEmail(
-      user.email,
-      req.body.verificationLink
-    );
+    await emailService.sendVerificationEmail(user.email);
 
     res.header('x-auth-token', jwt.generateJWT(user)).send({ user });
   }
