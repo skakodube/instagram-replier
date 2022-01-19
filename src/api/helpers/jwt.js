@@ -11,6 +11,6 @@ module.exports.generateJWT = function (user) {
   };
 
   return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: '60 days',
+    expiresIn: '24h',
   });
 };
