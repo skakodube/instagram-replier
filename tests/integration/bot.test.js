@@ -264,7 +264,7 @@ describe('/bot', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.bot._id).toEqual(bot._id.toString());
-        expect(res.body.bot.userModerators[0]).toEqual(
+        expect(res.body.bot.userModerators[0]._id).toEqual(
           userToInvite._id.toString()
         );
       });
