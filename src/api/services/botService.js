@@ -515,7 +515,6 @@ module.exports = class BotService {
       .select(
         '_id credentials.username isActive isValid defaultReply dateCreated'
       );
-    console.log(botRecord.userModerators);
     return botRecord;
   }
 };

@@ -8,14 +8,18 @@ const request = require('supertest');
 const app = require('../../src/app');
 const UserModel = require('../../src/api/models/user');
 const jwtHelper = require('../../src/api/helpers/jwt');
+const sgMail = require('@sendgrid/mail');
 
 describe('/user', () => {
   let user, authToken;
+  beforeAll(() => {
+    sgMail.send = jest.fn().mockResolvedValue(); //email mock
+  });
   beforeEach(async () => {
     user = new UserModel({
       firstName: 'Mark',
       lastName: 'Watney',
-      email: 'skakodube@gmail.com',
+      email: 'email@email.com',
       password: '12345',
       isVerified: true,
     });
@@ -104,7 +108,7 @@ describe('/user', () => {
   test('GET/send-recover-email', async () => {
     await request(app)
       .get('/user/send-recover-email')
-      .query({ email: 'skakodube@gmail.com' })
+      .query({ email: 'email@email.com' })
       .expect(200);
   });
 

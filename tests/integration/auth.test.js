@@ -8,8 +8,12 @@ const request = require('supertest');
 const app = require('../../src/app');
 const UserModel = require('../../src/api/models/user');
 const jwtHelper = require('../../src/api/helpers/jwt');
+const sgMail = require('@sendgrid/mail');
 
 describe('/auth', () => {
+  beforeAll(() => {
+    sgMail.send = jest.fn().mockResolvedValue(); //email mock
+  });
   afterAll(async () => {
     await UserModel.deleteMany({});
   });
@@ -46,13 +50,13 @@ describe('/auth', () => {
       .send({
         firstName: 'Anna',
         lastName: 'Doe',
-        email: 'skakodube@gmail.com',
+        email: 'email@email.com',
         password: '12345',
       })
       .expect('Content-Type', /json/)
       .expect(200)
       .then((res) => {
-        expect(res.body.user.email).toEqual('skakodube@gmail.com');
+        expect(res.body.user.email).toEqual('email@email.com');
         expect(res.body.user.firstName).toEqual('Anna');
       });
   });

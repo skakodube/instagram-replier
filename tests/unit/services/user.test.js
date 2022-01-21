@@ -12,6 +12,7 @@ const UserAlreadyExistError = require('../../../src/api/errors/userAlreadyExist'
 const InvalidTokenError = require('../../../src/api/errors/invalidToken');
 const UserService = require('../../../src/api/services/userService');
 const bcrypt = require('bcrypt');
+const sgMail = require('@sendgrid/mail');
 
 const userService = new UserService();
 let user;
@@ -25,7 +26,7 @@ async function runTestUserNotFound(callback, strDbMock = 'findOne') {
     });
   });
 }
-async function runTestInvalidPassword(callback) {
+async function runTestInvalidPassword(callback, strDbMock = 'findOne') {
   it('should return error if password is invalid', async () => {
     mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
 
@@ -36,6 +37,9 @@ async function runTestInvalidPassword(callback) {
 }
 
 describe('userService', () => {
+  beforeAll(() => {
+    sgMail.send = jest.fn().mockResolvedValue(); //email mock
+  });
   beforeEach(async () => {
     user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),

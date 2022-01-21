@@ -15,7 +15,7 @@ const emailService = new EmailService();
 
 async function runTestSendEmail(callback) {
   it('should generate token for user, if email is valid', async () => {
-    sgMail.send = jest.fn().mockResolvedValue();
+    sgMail.send = jest.fn().mockResolvedValue(); //email mock
     mockingoose(UserModel).toReturn(user, 'findOne'); //db mock
 
     await callback();
@@ -49,7 +49,7 @@ describe('emailService', () => {
   beforeEach(() => {
     user = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: 'skakodube@gmail.com',
+      email: 'email@email.com',
       firstName: 'Mark',
       lastName: 'Watney',
       password: '12345',

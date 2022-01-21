@@ -99,7 +99,7 @@ describe('botService', () => {
     bot.replies = [reply];
     user2 = new UserModel({
       _id: new mongoose.Types.ObjectId().toHexString(),
-      email: 'skakodube@gmail.com',
+      email: 'email2@email.com',
       firstName: 'Anna',
       lastName: 'Stone',
       password: '12345',
