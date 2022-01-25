@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/start.js",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "test": " jest --group=integration/routes/auth --watchAll --verbose --detectOpenHandles --coverage"
+    "test": " jest --group=unit/services/bot --watchAll --verbose --detectOpenHandles --coverage"
   },
   "engines": {
     "node": "16.6.1"
@@ -32,7 +32,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "mockingoose": "^2.15.2",
-    "mongoose": "^6.0.14",
+    "mongoose": "^6.1.8",
     "node-emoji": "^1.11.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.0",
@@ -41,10 +41,10 @@
     "winston-mongodb": "^5.0.7"
   },
   "prettier": {
-      "trailingComma": "es5",
-      "tabWidth": 2,
-      "semi": true,
-      "singleQuote": true
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
   },
   "repository": {
     "type": "git",

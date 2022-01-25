@@ -111,10 +111,16 @@ module.exports = class BotService {
       throw new PermissionError('🔥 User Is Not Verified.');
 
     const botRecord = await BotModel.findOneAndUpdate(
-      { _id: botId },
+      {
+        _id: botId,
+        $or: [
+          { userCreated: userRecord._id },
+          { userModerators: userRecord._id },
+        ],
+      },
       { isActive },
       { new: true }
-    ).or([{ userCreated: userRecord._id }, { userModerators: userRecord._id }]);
+    );
     if (!botRecord) throw new BotNotFoundError();
 
     return _.pick(botRecord, [
@@ -221,7 +227,6 @@ module.exports = class BotService {
         '_id credentials.username isValid isActive defaultReply userCreated createdAt'
       );
     if (!botRecordAndReplies) throw new BotNotFoundError();
-    //if no more, returs error
 
     return botRecordAndReplies;
   }
@@ -236,16 +241,17 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: botId,
-    }).or([
-      { userCreated: userRecord._id },
-      { userModerators: userRecord._id },
-    ]);
+      $or: [
+        { userCreated: userRecord._id },
+        { userModerators: userRecord._id },
+      ],
+    });
     if (!botRecord) throw new BotNotFoundError();
 
     const replyRecord = await ReplyModel.findOne({
       botBelongs: botRecord._id,
-      keywords: { $in: [newKeywords] },
-      answer: newAnswer,
+      // }).or({ answer: newAnswer }, { keywords: { $in: [newKeywords] } });
+      $or: [{ answer: newAnswer }, { keywords: { $in: [newKeywords] } }],
     });
     if (replyRecord)
       throw new ReplyAlreadyExistError(
@@ -285,18 +291,21 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: botId,
-    }).or([
-      { userCreated: userRecord._id },
-      { userModerators: userRecord._id },
-    ]);
+      $or: [
+        { userCreated: userRecord._id },
+        { userModerators: userRecord._id },
+      ],
+    });
     if (!botRecord) throw new BotNotFoundError();
 
     const editedReplyRecord = await ReplyModel.findOneAndUpdate(
       {
         _id: replyId,
         botBelongs: botRecord._id,
-        keywords: { $nin: [newKeywords] },
-        answer: { $ne: newAnswer },
+        $and: [
+          { answer: { $ne: newAnswer } },
+          { keywords: { $nin: [newKeywords] } },
+        ],
       },
       {
         keywords: newKeywords,
@@ -304,6 +313,7 @@ module.exports = class BotService {
       },
       { new: true }
     );
+    // ).or({ answer: newAnswer }, { keywords: { $in: [newKeywords] } });
     if (!editedReplyRecord)
       throw new ReplyNotFoundError(
         '🔥 No Reply found Or Keywords/Answer Already Used.'
@@ -327,10 +337,13 @@ module.exports = class BotService {
     if (!userRecord.isVerified)
       throw new PermissionError('🔥 User Is Not Verified.');
 
-    const botRecord = await BotModel.findOne({ _id: botId }).or([
-      { userCreated: userRecord._id },
-      { userModerators: userRecord._id },
-    ]);
+    const botRecord = await BotModel.findOne({
+      _id: botId,
+      $or: [
+        { userCreated: userRecord._id },
+        { userModerators: userRecord._id },
+      ],
+    });
     if (!botRecord) throw new BotNotFoundError();
 
     const replyRecord = await ReplyModel.findOneAndUpdate(
@@ -362,10 +375,11 @@ module.exports = class BotService {
 
     const botRecord = await BotModel.findOne({
       _id: mongoose.Types.ObjectId(botId),
-    }).or([
-      { userCreated: userRecord._id },
-      { userModerators: userRecord._id },
-    ]);
+      $or: [
+        { userCreated: userRecord._id },
+        { userModerators: userRecord._id },
+      ],
+    });
     if (!botRecord) throw new BotNotFoundError();
 
     const deletedReplyRecord = await ReplyModel.findOneAndDelete({
@@ -395,12 +409,16 @@ module.exports = class BotService {
     const botRecord = await BotModel.findOneAndUpdate(
       {
         _id: mongoose.Types.ObjectId(botId),
+        $or: [
+          { userCreated: userRecord._id },
+          { userModerators: userRecord._id },
+        ],
       },
       {
         defaultReply,
       },
       { new: true }
-    ).or([{ userCreated: userRecord._id }, { userModerators: userRecord._id }]);
+    );
     if (!botRecord) throw new BotNotFoundError();
 
     return _.pick(botRecord, [
