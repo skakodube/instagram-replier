@@ -250,7 +250,7 @@ module.exports = class BotService {
 
     const replyRecord = await ReplyModel.findOne({
       botBelongs: botRecord._id,
-      $or: [{ answer: newAnswer }, { keywords: { $in: newKeywords } }],
+      keywords: { $in: newKeywords },
     });
     if (replyRecord)
       throw new ReplyAlreadyExistError(
@@ -297,14 +297,18 @@ module.exports = class BotService {
     });
     if (!botRecord) throw new BotNotFoundError();
 
+    const replyRecord = await ReplyModel.findOne({
+      botBelongs: botRecord._id,
+      _id: { $ne: replyId },
+      keywords: { $in: newKeywords },
+    });
+    if (replyRecord)
+      throw new ReplyAlreadyExistError('🔥 Reply Keywords Already Exist.');
+
     const editedReplyRecord = await ReplyModel.findOneAndUpdate(
       {
         _id: replyId,
         botBelongs: botRecord._id,
-        $and: [
-          { answer: { $ne: newAnswer } },
-          { keywords: { $nin: newKeywords } },
-        ],
       },
       {
         keywords: newKeywords,
